@@ -167,6 +167,8 @@ input[type=text],input[type=search]{width:100%;font:inherit;padding:11px 12px;bo
 .bcell.on::after{content:"✓";position:absolute;top:4px;right:6px;color:var(--good);font-weight:800}
 .bcell[disabled]{opacity:.3;cursor:not-allowed}
 .count{font-family:var(--display);font-size:26px}
+.login{display:flex;align-items:center;gap:12px}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--gold);color:var(--on-gold);display:grid;place-items:center;font-family:var(--display);font-size:20px;flex:none}
 .saved{font-size:12px;color:var(--muted)}
 
 /* dicas */
@@ -621,6 +623,8 @@ function viewAccount(){
   const own=owned(); const f=state.accFilter, q=state.accQuery.trim().toLowerCase();
   const list=ALL.filter(n=>(f==="Todos"||CLS[n]===f)&&(!q||n.toLowerCase().includes(q)));
   return `<section class="stack"><h2>${state.profile.nick?"Sua conta":"Criar sua conta"}</h2>
+   ${fb.ready?(fb.user?`<div class="panel login"><div class="avatar" aria-hidden="true">${esc((fb.user.displayName||fb.user.email||"?").trim()[0].toUpperCase())}</div><div style="min-width:0;flex:1"><b>${esc(fb.user.displayName||"Conta Google")}</b><div class="sub" style="overflow:hidden;text-overflow:ellipsis">${esc(fb.user.email||"")}</div></div><button class="btn small" data-act="logout">Sair</button></div>`
+     :`<div class="panel stack" style="gap:10px"><div><h3>Entre com sua conta Google</h3><div class="sub">Seus brawlers e Buffies ficam salvos na conta e aparecem no celular e no PC.</div></div><button class="btn gold" data-act="login">Entrar com Google</button><div class="sub" id="loginmsg">${esc(fb.msg||"")}</div></div>`):""}
    <div class="panel stack">
      <div class="field"><label for="nick">Seu nick</label><input type="text" id="nick" maxlength="24" placeholder="Como te chamam no jogo" value="${esc(state.profile.nick)}" autocomplete="off"></div>
      <div class="saved" id="saved">${syncLabel()}</div>
@@ -640,7 +644,8 @@ function viewAccount(){
   </section>`;
 }
 function syncLabel(){
-  return state.sync==="cloud" ? "Salvo na sua conta Claude, aparece em qualquer aparelho."
+  return state.sync==="fb" ? "Salvo na sua conta Google, aparece em qualquer aparelho."
+    : state.sync==="cloud" ? "Salvo na sua conta Claude, aparece em qualquer aparelho."
     : state.sync==="saving" ? "Salvando…"
     : state.sync==="loading" ? "Carregando sua conta…"
     : "Salvo neste aparelho.";
@@ -685,6 +690,8 @@ document.addEventListener("click",e=>{
     case "owned": state.onlyOwned=!state.onlyOwned; break;
     case "newdraft": state.draft={map:null,fp:null,pos:null,picks:{},hidden:[]}; render(); window.scrollTo({top:0}); return;
     case "accf": state.accFilter=v; break;
+    case "login": fbLogin(); return;
+    case "logout": if(fb.ready) fb.mods.auth.signOut(fb.auth); return;
     case "buf": { const s=new Set(state.profile.buffies||[]); s.has(v)?s.delete(v):s.add(v); state.profile.buffies=[...s].sort(); persist(); break; }
     case "own": { const s=owned(); s.has(v)?s.delete(v):s.add(v); state.profile.owned=[...s].sort(); persist(); b.classList.toggle("on"); b.setAttribute("aria-pressed",s.has(v)); refreshCount(); return; }
     case "selall": case "selnone": { const f=state.accFilter,q=state.accQuery.trim().toLowerCase(); const list=ALL.filter(n=>(f==="Todos"||CLS[n]===f)&&(!q||n.toLowerCase().includes(q))); const s=owned(); list.forEach(n=>a==="selall"?s.add(n):s.delete(n)); state.profile.owned=[...s].sort(); persist(); break; }
@@ -707,6 +714,7 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!sheet.hidden) clo
 let dbRef=null, writing=false, pending=false, timer=null;
 function persist(){
   saveLocal();
+  if(fb.user){ clearTimeout(fb.timer); fb.timer=setTimeout(fbFlush,700); return; }
   if(!dbRef) return;
   clearTimeout(timer); timer=setTimeout(flush,700);
 }
@@ -750,6 +758,71 @@ function fromJson(j){ return j.mapas.filter(m=>MODES[m.modo]).map(m=>({m:m.modo,
     if(cur){ const i=MAPS.findIndex(x=>x.slug===cur); state.draft.map = i>=0?i:null; if(i<0){state.draft.fp=null;state.draft.pos=null;state.draft.picks={};} }
     render();
   }catch(e){}
+})();
+
+/* ======================= CONTA GOOGLE (FIREBASE) ======================= */
+/* Funciona no site do GitHub. Dentro do Claude o Firebase não carrega, e o site segue sem ele. */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyALfjLrGw2oJm8KIAVAdit36K4aYEgjPQc",
+  authDomain: "brawl-picks.firebaseapp.com",
+  projectId: "brawl-picks",
+  storageBucket: "brawl-picks.firebasestorage.app",
+  messagingSenderId: "1090029222149",
+  appId: "1:1090029222149:web:7d0cc7225ca3510c1adf6c"
+};
+const FB_VER = "10.12.2";
+const fb = {ready:false,user:null,msg:"",timer:null,writing:false,pending:false};
+const ERROS_LOGIN = {
+  "auth/unauthorized-domain":"Esse endereço não está autorizado no Firebase.",
+  "auth/network-request-failed":"Sem internet no momento. Tente de novo.",
+  "auth/operation-not-supported-in-this-environment":"Esse navegador não deixa entrar com Google. Abra o site no Chrome ou no Safari.",
+  "auth/web-storage-unsupported":"Esse navegador bloqueia o login. Abra o site no Chrome ou no Safari."
+};
+async function fbLogin(){
+  if(!fb.ready) return;
+  const {auth:A}=fb.mods; const prov=new A.GoogleAuthProvider();
+  fb.msg=""; try{ await A.signInWithPopup(fb.auth,prov); }
+  catch(e){
+    const c=e&&e.code||"";
+    if(c==="auth/popup-closed-by-user"||c==="auth/cancelled-popup-request") return;
+    if(c==="auth/popup-blocked"){ try{ await A.signInWithRedirect(fb.auth,prov); return; }catch(e2){} }
+    fb.msg = ERROS_LOGIN[c] || "Não deu pra entrar. Se abriu pelo WhatsApp ou Instagram, abra o site no Chrome ou no Safari e tente de novo.";
+    const el=document.getElementById("loginmsg"); if(el) el.textContent=fb.msg;
+  }
+}
+async function fbFlush(){
+  if(!fb.user) return;
+  if(fb.writing){ fb.pending=true; return; }
+  fb.writing=true; setSync("saving");
+  const F=fb.mods.fs;
+  try{
+    await F.setDoc(F.doc(fb.db,"usuarios",fb.user.uid),{nick:state.profile.nick,owned:state.profile.owned,buffies:state.profile.buffies||[],atualizado:F.serverTimestamp()});
+    setSync("fb");
+  }catch(e){ setSync("local"); }
+  fb.writing=false; if(fb.pending){ fb.pending=false; fbFlush(); }
+}
+(async()=>{
+  try{
+    const base=`https://www.gstatic.com/firebasejs/${FB_VER}/`;
+    const [appM,authM,fsM]=await Promise.all([import(base+"firebase-app.js"),import(base+"firebase-auth.js"),import(base+"firebase-firestore.js")]);
+    const app=appM.initializeApp(FIREBASE_CONFIG);
+    fb.mods={auth:authM,fs:fsM}; fb.auth=authM.getAuth(app); fb.db=fsM.getFirestore(app); fb.ready=true;
+    authM.getRedirectResult(fb.auth).catch(()=>{});
+    authM.onAuthStateChanged(fb.auth, async u=>{
+      fb.user=u||null;
+      if(u){
+        setSync("loading");
+        try{
+          const snap=await fsM.getDoc(fsM.doc(fb.db,"usuarios",u.uid));
+          const primeiro=(u.displayName||"").split(" ")[0];
+          if(snap.exists()){ state.profile=cleanProfile(snap.data(),primeiro); saveLocal(); setSync("fb"); }
+          else { if(!state.profile.nick) state.profile.nick=primeiro; saveLocal(); await fbFlush(); }
+        }catch(e){ setSync("local"); }
+      } else if(state.sync==="fb"||state.sync==="loading"){ setSync("local"); }
+      render();
+    });
+    render();
+  }catch(e){ /* sem Firebase aqui: continua salvando no aparelho */ }
 })();
 
 render();

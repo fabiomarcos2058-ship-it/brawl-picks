@@ -12,7 +12,11 @@ seus 5 melhores picks, com o motivo de cada um.
   Buffies e o top 3 de cada mapa do ranked.
 - **Upar:** em quais brawlers vale gastar recurso.
 - **Dicas:** como funciona a ranked e o que cada modo pede.
-- **Conta:** seus brawlers no nível 11 e seus Buffies, salvos no navegador.
+- **Conta:** login com Google (Firebase). Seus brawlers no nível 11 e seus Buffies
+  ficam salvos na conta. Sem login, ficam salvos no navegador.
+
+As regras do banco estão em `firestore.rules`: cole no Firebase em
+Firestore → Regras → Publicar.
 
 Os números vêm do [Brawl Time Ninja](https://brawltime.ninja/tier-list/ranked)
 e do [Brawl Planet](https://www.brawlplanet.com/tier-list), e as mudanças das
