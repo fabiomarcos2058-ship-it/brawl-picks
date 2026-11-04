@@ -356,14 +356,16 @@ const BUFFIES = [
   {trio:"Starrcade",data:"jun 2026",b:["8-Bit","Brock","Rico"]},
   {trio:"Super City",data:"jun 2026",b:["Max","Meg","Surge"]},
   {trio:"Ghost Station",data:"set 2026",b:["Chuck","Gus","Shade"]},
-  {trio:"Poco's Bandstand",data:"set 2026",b:["Amber","El Primo","Poco"]}
+  {trio:"Poco's Bandstand",data:"set 2026",b:["Amber","El Primo","Poco"]},
+  {trio:"Snowtel",data:"3 nov 2026",b:["Mr. P","Lou","Gale"]},
+  {trio:"Candyland",data:"3 nov 2026",b:["Mandy","Chester","Berry"]}
 ];
 const BUFFIES_NEW = [
   {trio:"Snowtel",b:[["Mr. P","O sino dá escudo pra ele e pro carregador, e chegam carregadores extras"],["Lou","Dá pra cancelar o bloco de gelo antes e ele deixa uma área que congela"],["Gale","Parede de vento que desvia tiros e tornado que acelera aliados"]]},
   {trio:"Candyland",b:[["Mandy","Lentidão mais forte de perto e o Hyper mantém o alcance longo sem precisar focar"],["Chester","A caixa surpresa vem com uma caixa falsa e o Hyper joga o dobro de sinos"],["Berry","Poça que cura aliados e ataque que se divide no Hyper"]]}
 ];
 const HAS_BUFFIE = new Set(BUFFIES.flatMap(t=>t.b));
-const SOON_BUFFIE = new Set(BUFFIES_NEW.flatMap(t=>t.b.map(x=>x[0])));
+const SOON_BUFFIE = new Set(); /* nenhum anunciado esperando no momento */
 
 /* Regra geral de classe (não é dado de partida): quem costuma levar vantagem sobre quem */
 const BEATS = {Assassino:["Atirador","Artilharia","Suporte"],Tanque:["Atirador","Assassino"],Dano:["Tanque","Assassino"],Controlador:["Tanque","Assassino"],Artilharia:["Tanque","Controlador"],Atirador:["Artilharia","Suporte","Controlador"],Suporte:[]};
@@ -619,10 +621,10 @@ function viewMeta(){
      <div class="src">Fonte: <a href="https://trophycoach.com/brawl-stars/guides/brawl-stars-ranked-mode-guide" target="_blank" rel="noopener">TrophyCoach</a>.</div>
    </div>
    <div class="grid2">
-     <div class="panel"><div class="eyebrow">Novos, anunciados em 31 out</div>
+     <div class="panel"><div class="eyebrow">Novos, chegaram em 3 nov</div>
        ${BUFFIES_NEW.map(t=>`<h3 style="margin:10px 0 2px">${esc(t.trio)}</h3><div class="rows">${t.b.map(([n,e])=>`<div class="row">${tile(n)}<span class="nm">${esc(n)}<br><span class="sub" style="font-weight:400">${esc(e)}</span></span></div>`).join("")}</div>`).join("")}
-       <div class="src" style="margin-top:8px">Ainda não chegaram no jogo e a data não foi confirmada. Fontes: <a href="https://brawlstarsblog.com/november-2026-brawl-talk/" target="_blank" rel="noopener">Brawl Stars Blog</a>, <a href="https://brawlmetrics.gg/buffies" target="_blank" rel="noopener">BrawlMetrics</a>.</div></div>
-     <div class="panel"><div class="eyebrow">Já no jogo · 27 brawlers</div><div class="rows">${BUFFIES.map(t=>`<div class="mline"><b>${esc(t.trio)}</b><span>${t.b.map(esc).join(", ")} · ${t.data}</span></div>`).join("")}</div></div>
+       <div class="src" style="margin-top:8px">Na máquina de Buffies do jogo, cada tentativa custa 2.000 pontos de força e 1.000 moedas. Também tem uma máquina só com Buffies de Bling, por 10.000 de Bling. Fontes: <a href="https://brawlstarsblog.com/november-2026-brawl-talk/" target="_blank" rel="noopener">Brawl Stars Blog</a>, <a href="https://brawlmetrics.gg/buffies" target="_blank" rel="noopener">BrawlMetrics</a>.</div></div>
+     <div class="panel"><div class="eyebrow">Já no jogo · ${HAS_BUFFIE.size} brawlers</div><div class="rows">${BUFFIES.map(t=>`<div class="mline"><b>${esc(t.trio)}</b><span>${t.b.map(esc).join(", ")} · ${t.data}</span></div>`).join("")}</div></div>
    </div>
    <h2>Por modo</h2><div class="grid2">${Object.keys(MODES).map(m=>`<div class="panel"><div class="mode-h">${micon(m)}<h3>${MODES[m].nome}</h3></div><div class="rows">${MODE_DATA[m].fortes.map(x=>row(x[0],"+"+fmt(x[1])+"%",1)).join("")}</div></div>`).join("")}</div>
    <h2>Mapas da temporada</h2><div class="sub">Só os mapas da rotação atual da ranked, com a taxa de vitória de Diamante 1 pra cima. Atualizado em ${esc(mapsDate())}.</div><div class="panel">${Object.keys(MODES).map(m=>`<details class="mapref" ${m==="gem"?"open":""}><summary>${micon(m)}${MODES[m].nome}</summary>${MAPS.filter(x=>x.m===m).map(x=>`<div class="mline"><b>${esc(x.n)}</b><span>${x.t.length?x.t.slice(0,4).map(t=>`${esc(t[0])} ${fmt(t[2])}%`).join(" · "):"sem dados ainda, usa o modo"}</span></div>`).join("")}</details>`).join("")}</div>
