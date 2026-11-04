@@ -96,6 +96,7 @@ def main():
             abrir_issue(url)
         print(f"{len(novos)} post(s) novo(s).")
 
+    os.makedirs(os.path.dirname(VISTOS), exist_ok=True)
     with open(VISTOS, "w") as f:
         json.dump(sorted(set(vistos + atuais)), f, indent=2, ensure_ascii=False)
 
