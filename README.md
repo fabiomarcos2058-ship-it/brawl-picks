@@ -22,6 +22,17 @@ Os números vêm do [Brawl Time Ninja](https://brawltime.ninja/tier-list/ranked)
 e do [Brawl Planet](https://www.brawlplanet.com/tier-list), e as mudanças das
 [notas oficiais da Supercell](https://supercell.com/en/games/brawlstars/blog/).
 
+## Times e histórico
+
+- **Time:** crie uma dupla ou um trio e mande o convite (link ou código de 6
+  letras). No draft, as sugestões pros amigos usam os brawlers que cada um tem
+  upado.
+- **Histórico:** no fim do draft você marca o brawler que jogou e se ganhou.
+  A aba Histórico mostra a taxa de vitória por brawler, modo e mapa, e as
+  sugestões passam a considerar como você vai com cada brawler.
+- **App:** dá pra instalar no celular (Android pelo botão na Conta; iPhone em
+  Compartilhar → Adicionar à Tela de Início).
+
 ## Publicar
 
 O site é um arquivo só: `index.html`. Pra colocar no ar:

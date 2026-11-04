@@ -3,10 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Seu draft da ranked de Brawl Stars, pelos dados: melhores picks por mapa, time com amigos e histórico.">
+<meta name="theme-color" content="#0a1222">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Brawl Picks">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
-<title>Draft Ranked</title>
+<title>Brawl Picks</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Rubik:wght@400;500;600;700&display=swap">
@@ -44,6 +53,7 @@ h2{font-size:22px}
 h3{font-size:17px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
 .brand{display:flex;align-items:center;gap:10px}
+.logo{width:46px;height:46px;flex:none}
 .badge{width:40px;height:40px;border-radius:12px;background:var(--gold);color:var(--on-gold);display:grid;place-items:center;font-family:var(--display);font-size:20px;transform:rotate(-6deg);box-shadow:0 3px 0 var(--gold-ink)}
 .sub{color:var(--muted);font-size:13px}
 .hello{font-size:13px;color:var(--muted);text-align:right}
@@ -168,6 +178,23 @@ input[type=text],input[type=search]{width:100%;font:inherit;padding:11px 12px;bo
 .bcell[disabled]{opacity:.3;cursor:not-allowed}
 .count{font-family:var(--display);font-size:26px}
 .login{display:flex;align-items:center;gap:12px}
+.avatar.sm{width:32px;height:32px;font-size:15px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--surface2);border-radius:12px;padding:4px}
+.segb{border:0;background:none;padding:9px 6px;border-radius:9px;font-weight:700;color:var(--muted)}
+.segb.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 0 var(--line)}
+.teamcard.on{border:2px solid var(--good)}
+.code{font-family:var(--display);font-weight:400;letter-spacing:.08em;color:var(--ink)}
+.invite{display:flex;flex-direction:column;gap:8px;background:var(--surface2);border-radius:12px;padding:12px}
+.sel{user-select:all;-webkit-user-select:all;font-size:13px;word-break:break-all;color:var(--gold-ink)}
+a.btn{text-decoration:none;display:inline-block;color:var(--ink)}
+.frow{display:flex;flex-direction:column;gap:6px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tilebox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tilebox b{font-family:var(--display);font-weight:400;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
+.tilebox b.sm{font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tilebox small{font-size:11.5px;color:var(--muted)}
+.wbar{width:56px;height:6px;border-radius:99px;background:var(--surface2);overflow:hidden;flex:none}
+.wbar span{display:block;height:100%;background:var(--good);border-radius:99px}
 .avatar{width:42px;height:42px;border-radius:50%;background:var(--gold);color:var(--on-gold);display:grid;place-items:center;font-family:var(--display);font-size:20px;flex:none}
 .saved{font-size:12px;color:var(--muted)}
 
@@ -207,8 +234,8 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <div class="badge" aria-hidden="true">D</div>
-      <div><h1>Draft Ranked</h1><div class="sub">Picks pelos dados da temporada · nov 2026</div></div>
+      <svg class="logo" viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="9" width="20" height="30" rx="5" transform="rotate(-12 15 24)" fill="var(--ally)"/><rect x="23" y="9" width="20" height="30" rx="5" transform="rotate(12 33 24)" fill="var(--enemy)"/><path d="M24 12.5l3.4 7 7.6 1.1-5.5 5.3 1.3 7.6L24 29.9l-6.8 3.6 1.3-7.6-5.5-5.3 7.6-1.1z" fill="var(--gold)" stroke="var(--bg)" stroke-width="2" stroke-linejoin="round"/></svg>
+      <div><h1>Brawl Picks</h1><div class="sub">Seu draft da ranked, pelos dados</div></div>
     </div>
     <div class="hello" id="hello"></div>
   </header>
@@ -347,8 +374,15 @@ const state = {
   tab:"draft",
   profile:{nick:"",owned:[],buffies:[]},
   draft:{map:null,fp:null,pos:null,picks:{},hidden:[]},
-  onlyOwned:true, accFilter:"Todos", accQuery:"", sync:"local"
+  onlyOwned:true, accFilter:"Todos", accQuery:"", sync:"local",
+  metaSub:"meta", matches:[], activeTeam:null, joinCode:null, newTeamName:"", codeInput:"", teamMsg:"", confirm:null, install:null
 };
+const KEY_P="draftRanked.partidas", KEY_T="draftRanked.time";
+function loadLocalMatches(){ try{ const a=JSON.parse(localStorage.getItem(KEY_P)||"[]"); return Array.isArray(a)?a.filter(m=>m&&CLS[m.brawler]):[]; }catch(e){ return []; } }
+function saveLocalMatches(a){ try{ localStorage.setItem(KEY_P,JSON.stringify(a.slice(0,500))); }catch(e){} }
+state.matches=loadLocalMatches();
+try{ state.activeTeam=localStorage.getItem(KEY_T)||null; }catch(e){}
+function saveTeamLocal(){ try{ state.activeTeam?localStorage.setItem(KEY_T,state.activeTeam):localStorage.removeItem(KEY_T); }catch(e){} }
 function loadLocal(){ try{ const raw=localStorage.getItem(KEY); if(raw){ const p=JSON.parse(raw); if(p&&Array.isArray(p.owned)) state.profile=cleanProfile(p); } }catch(e){} }
 function cleanProfile(p,fallbackNick){ return {nick:String(p.nick||fallbackNick||""),owned:Array.isArray(p.owned)?p.owned.filter(n=>CLS[n]):[],buffies:Array.isArray(p.buffies)?p.buffies.filter(n=>HAS_BUFFIE.has(n)):[]}; }
 function saveLocal(){ try{ localStorage.setItem(KEY,JSON.stringify(state.profile)); }catch(e){} }
@@ -389,6 +423,7 @@ function recommend(){
   const allies = vis.filter(s=>slotTeam(s)==="a").map(s=>d.picks[s]).filter(Boolean);
   const own = owned(); const useOwned = state.onlyOwned && own.size>0;
   const myBuffies = new Set(state.profile.buffies||[]);
+  const ST = stats(); const mkey = mapObj.slug||mapObj.n;
   const out=[];
   for(const n of ALL){
     if(picked.includes(n) || d.hidden.includes(n)) continue;
@@ -401,12 +436,24 @@ function recommend(){
     else if(HAS_BUFFIE.has(n)) why.push(["","Tem Buffie no jogo"]);
     const dup = allies.filter(a=>CLS[a]===c).length;
     if(dup){ s-=0.8*dup; why.push(["r",`Repete classe do time`]); }
+    const ps=ST.byB[n];
+    if(ps&&ps.g>=3){ const wr=ps.w/ps.g; s+=(wr-.5)*4*Math.min(1,ps.g/10); why.unshift([wr>=.5?"g":"r",`Você: ${Math.round(wr*100)}% em ${ps.g} jogos`]); }
+    const pm=ST.byMB[mkey+"|"+n]; if(pm&&pm.g>=2) s+=(pm.w/pm.g-.5)*2;
     out.push({n,s,why,own:own.has(n)});
   }
   out.sort((a,b)=>b.s-a.s);
   const pool = useOwned ? out.filter(x=>x.own) : out;
   return {top:pool.slice(0,5), all:out, useOwned, enemies, allies};
 }
+
+function stats(){
+  const st={byB:{},byMB:{},byMap:{},byMode:{},g:0,w:0};
+  const add=(o,k,v,extra)=>{ if(!o[k]) o[k]=Object.assign({g:0,w:0},extra||{}); o[k].g++; o[k].w+=v; };
+  for(const m of state.matches){ const v=m.venceu?1:0; st.g++; st.w+=v;
+    add(st.byB,m.brawler,v); add(st.byMB,m.mapa+"|"+m.brawler,v); add(st.byMap,m.mapa,v,{nome:m.mapaNome,modo:m.modo}); add(st.byMode,m.modo,v); }
+  return st;
+}
+function activeTeam(){ if(!fb.user) return null; return fb.teams.find(x=>x.id===state.activeTeam) || (fb.teams.length===1?fb.teams[0]:null); }
 
 /* ======================= ÍCONES ======================= */
 const ICON = {
@@ -420,6 +467,8 @@ const ICON = {
   meta:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V5M5 11l7-7 7 7"/></svg>',
   tips:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>',
+  team:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.6 3.5-5.5 6.5-5.5s5.5 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.8"/><path d="M16 14.6c2.8-.3 4.8 1.4 5.6 4.4"/></svg>',
+  hist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>',
   user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>'
 };
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -431,7 +480,7 @@ const app = document.getElementById("app");
 function render(){
   renderTabs(); renderHello();
   const t=state.tab;
-  app.innerHTML = t==="draft"?viewDraft() : t==="meta"?viewMeta() : t==="up"?viewUp() : t==="tips"?viewTips() : viewAccount();
+  app.innerHTML = t==="draft"?viewDraft() : t==="team"?viewTeam() : t==="hist"?viewHist() : t==="meta"?viewMetaHub() : viewAccount();
 }
 function renderHello(){
   const n=state.profile.owned.length;
@@ -440,7 +489,7 @@ function renderHello(){
     : `<span>${n?n+" upados":"Sem conta ainda"}</span>`;
 }
 function renderTabs(){
-  const items=[["draft","Draft"],["meta","Meta"],["up","Upar"],["tips","Dicas"],["account","Conta"]];
+  const items=[["draft","Draft"],["team","Time"],["hist","Histórico"],["meta","Meta"],["account","Conta"]];
   document.getElementById("tabs").innerHTML = items.map(([k,l])=>`<button class="tab" data-act="tab" data-v="${k}" ${state.tab===k?'aria-current="page"':""}>${ICON[k==="account"?"user":k]}<span>${l}</span></button>`).join("");
 }
 
@@ -514,12 +563,34 @@ function viewResult(){
   /* amigos */
   const partner=partnerSlot();
   const laterAllies = ORDER.filter(s=>slotTeam(s)==="a" && s!==me && PHASE[s]>=PHASE[me]).length;
+  const team=activeTeam(); const friends = team ? (fb.members[team.id]||[]).filter(m=>m.uid!==fb.user.uid) : [];
   if(laterAllies){
     const first=r.top[0]?.n; const fc=first?CLS[first]:null;
-    const fr=r.all.filter(x=>x.n!==first && !r.top.slice(0,1).some(t=>t.n===x.n)).sort((a,b)=>(b.s-(CLS[b.n]===fc?1:0))-(a.s-(CLS[a.n]===fc?1:0))).slice(0,3);
-    h+=`<div class="panel stack" style="gap:10px"><h3>Pra sugerir aos amigos</h3><div class="sub">${partner&&slotTeam(partner)==="a"?"Seu parceiro escolhe junto com você, então combinem antes. ":""}Opções fortes no mapa com classe diferente da sua melhor escolha.</div>
-      <div class="friends">${fr.map(x=>`<span class="fr">${tile(x.n)}${esc(x.n)}</span>`).join("")}</div></div>`;
+    const aviso = partner&&slotTeam(partner)==="a" ? "Seu parceiro escolhe junto com você, então combinem antes. " : "";
+    if(friends.length){
+      const used=new Set(first?[first]:[]); const usedC=new Set(fc?[fc]:[]);
+      const rows=friends.map(f=>{
+        const fo=new Set(f.owned||[]);
+        if(!fo.size) return `<div class="frow"><b>${esc(f.nick||"Amigo")}</b><div class="sub">Ainda não marcou os brawlers upados.</div></div>`;
+        const cand=r.all.filter(x=>fo.has(x.n)&&!used.has(x.n)).sort((a,b)=>(b.s-(usedC.has(CLS[b.n])?1:0))-(a.s-(usedC.has(CLS[a.n])?1:0))).slice(0,3);
+        if(cand[0]){ used.add(cand[0].n); usedC.add(CLS[cand[0].n]); }
+        return `<div class="frow"><b>${esc(f.nick||"Amigo")}</b><div class="friends">${cand.map(x=>`<span class="fr">${tile(x.n)}${esc(x.n)}</span>`).join("")||'<span class="sub">Nenhum upado dele sobrou nesse draft.</span>'}</div></div>`;
+      }).join("");
+      h+=`<div class="panel stack" style="gap:10px"><h3>Pros amigos do ${esc(team.nome)}</h3><div class="sub">${aviso}Só com os brawlers que cada um tem upado, sem repetir classe quando dá.</div>${rows}</div>`;
+    } else {
+      const fr=r.all.filter(x=>x.n!==first).sort((a,b)=>(b.s-(CLS[b.n]===fc?1:0))-(a.s-(CLS[a.n]===fc?1:0))).slice(0,3);
+      h+=`<div class="panel stack" style="gap:10px"><h3>Pra sugerir aos amigos</h3><div class="sub">${aviso}Opções fortes no mapa com classe diferente da sua melhor escolha.${fb.ready?" Crie um time na aba Time pra ver sugestões com os brawlers que seus amigos têm.":""}</div>
+        <div class="friends">${fr.map(x=>`<span class="fr">${tile(x.n)}${esc(x.n)}</span>`).join("")}</div></div>`;
+    }
   }
+  /* registrar resultado */
+  const played = d.played || r.top[0]?.n || null;
+  const opts=[...new Set([played,...r.top.map(x=>x.n)].filter(Boolean))];
+  h+=`<div class="panel stack" style="gap:10px"><h3>Depois da partida</h3><div class="sub">Marque o resultado pra montar seu histórico. Com 3 jogos ou mais num brawler, as sugestões passam a considerar como você vai com ele.</div>
+    <div class="eyebrow">Qual brawler você jogou?</div>
+    <div class="friends">${opts.map(n=>`<button class="fr bufb ${n===played?"on":""}" data-act="played" data-v="${esc(n)}">${tile(n)}${esc(n)}</button>`).join("")}<button class="fr bufb" data-act="playedother">Outro…</button></div>
+    <div class="choice"><button class="opt ally" data-act="res" data-v="v" ${played?"":"disabled"}><big>Ganhei</big></button><button class="opt enemy" data-act="res" data-v="d" ${played?"":"disabled"}><big>Perdi</big></button></div>
+    ${d.savedMsg?`<div class="sub" style="color:var(--good);font-weight:600">${esc(d.savedMsg)}</div>`:""}</div>`;
   h+=`<div class="src">A pontuação junta a taxa de vitória no mapa (Brawl Planet, ranqueada Diamante 1 pra cima, ${esc(mapsDate())}), a força no modo e no ranked (Brawl Time Ninja, 1 nov) e o tier por vitória (Brawl Planet). Boa parte desses números ainda é de antes do balanceamento de ${PATCH.data}: nerf forte corta a pontuação pela metade, nerf leve tira 20% e buff soma um pouco, até sair dado novo. O "bom contra" é regra geral de classe, não estatística de confronto.</div>
     <button class="btn" data-act="newdraft">Novo draft</button></section>`;
   return h;
@@ -625,6 +696,7 @@ function viewAccount(){
   return `<section class="stack"><h2>${state.profile.nick?"Sua conta":"Criar sua conta"}</h2>
    ${fb.ready?(fb.user?`<div class="panel login"><div class="avatar" aria-hidden="true">${esc((fb.user.displayName||fb.user.email||"?").trim()[0].toUpperCase())}</div><div style="min-width:0;flex:1"><b>${esc(fb.user.displayName||"Conta Google")}</b><div class="sub" style="overflow:hidden;text-overflow:ellipsis">${esc(fb.user.email||"")}</div></div><button class="btn small" data-act="logout">Sair</button></div>`
      :`<div class="panel stack" style="gap:10px"><div><h3>Entre com sua conta Google</h3><div class="sub">Seus brawlers e Buffies ficam salvos na conta e aparecem no celular e no PC.</div></div><button class="btn gold" data-act="login">Entrar com Google</button><div class="sub" id="loginmsg">${esc(fb.msg||"")}</div></div>`):""}
+   ${appCard()}
    <div class="panel stack">
      <div class="field"><label for="nick">Seu nick</label><input type="text" id="nick" maxlength="24" placeholder="Como te chamam no jogo" value="${esc(state.profile.nick)}" autocomplete="off"></div>
      <div class="saved" id="saved">${syncLabel()}</div>
@@ -643,6 +715,18 @@ function viewAccount(){
    ${own.size?`<button class="btn gold" data-act="tab" data-v="draft">Ir pro draft</button>`:""}
   </section>`;
 }
+function appCard(){
+  const standalone = window.matchMedia && matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  if(standalone || !fb.ready) return "";
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(state.install) return `<div class="panel login"><span aria-hidden="true">${'<svg class="logo" style="width:38px;height:38px" viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="9" width="20" height="30" rx="5" transform="rotate(-12 15 24)" fill="var(--ally)"/><rect x="23" y="9" width="20" height="30" rx="5" transform="rotate(12 33 24)" fill="var(--enemy)"/><path d="M24 12.5l3.4 7 7.6 1.1-5.5 5.3 1.3 7.6L24 29.9l-6.8 3.6 1.3-7.6-5.5-5.3 7.6-1.1z" fill="var(--gold)" stroke="var(--bg)" stroke-width="2" stroke-linejoin="round"/></svg>'}</span><div style="flex:1;min-width:0"><b>Instale o Brawl Picks</b><div class="sub">Abre como app, direto da tela inicial.</div></div><button class="btn small gold" data-act="install">Instalar</button></div>`;
+  if(ios) return `<div class="panel login"><div style="flex:1"><b>Instale no iPhone</b><div class="sub">No Safari, toque em Compartilhar e depois em "Adicionar à Tela de Início".</div></div></div>`;
+  return "";
+}
+async function installApp(){ const ev=state.install; if(!ev) return; state.install=null; try{ ev.prompt(); await ev.userChoice; }catch(e){} render(); }
+window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); state.install=e; if(state.tab==="account") render(); });
+if("serviceWorker" in navigator && /github\.io$/.test(location.hostname)){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+
 function syncLabel(){
   return state.sync==="fb" ? "Salvo na sua conta Google, aparece em qualquer aparelho."
     : state.sync==="cloud" ? "Salvo na sua conta Claude, aparece em qualquer aparelho."
@@ -651,19 +735,86 @@ function syncLabel(){
     : "Salvo neste aparelho.";
 }
 
+/* ======================= TIME, HISTÓRICO E META ======================= */
+function viewMetaHub(){
+  const subs=[["meta","Meta"],["up","Upar"],["tips","Dicas"]];
+  return `<div class="seg" role="tablist">${subs.map(([k,l])=>`<button class="segb ${state.metaSub===k?"on":""}" role="tab" aria-selected="${state.metaSub===k}" data-act="metasub" data-v="${k}">${l}</button>`).join("")}</div>`
+    + (state.metaSub==="up"?viewUp():state.metaSub==="tips"?viewTips():viewMeta());
+}
+function inviteLink(id){ return location.origin+location.pathname+"#entrar-"+id; }
+function viewTeam(){
+  let h=`<section class="stack"><h2>Seu time</h2><div class="sub">Monte uma dupla ou um trio. Na hora do draft, as sugestões pros amigos usam os brawlers que cada um tem upado de verdade.</div>`;
+  if(!fb.ready){
+    return h+`<div class="panel">Os times funcionam no site, com login do Google: <b>fabiomarcos2058-ship-it.github.io/brawl-picks</b></div></section>`;
+  }
+  if(!fb.user){
+    return h+`<div class="panel stack" style="gap:10px">${state.joinCode?`<div class="notice"><span>Você recebeu um convite pra um time. Entre com Google pra aceitar.</span></div>`:""}<button class="btn gold" data-act="login">Entrar com Google</button><div class="sub" id="loginmsg">${esc(fb.msg||"")}</div></div></section>`;
+  }
+  if(state.teamMsg) h+=`<div class="notice"><span>${esc(state.teamMsg)}</span></div>`;
+  if(state.joinCode && !fb.teams.some(t=>t.id===state.joinCode)){
+    const ji=fb.joinInfo;
+    h+=`<div class="panel stack" style="gap:10px;border:2px solid var(--gold)"><div class="eyebrow">Convite</div>
+      ${ji===undefined?`<div class="sub">Procurando o time ${esc(state.joinCode)}…</div>`
+        : ji===null?`<div>O time <b>${esc(state.joinCode)}</b> não existe mais. Peça um convite novo.</div>`
+        : `<h3>${esc(ji.nome)}</h3><div class="sub">${ji.membros.length} de 3 jogadores</div>${ji.membros.length>=3?`<div>Esse time já está cheio.</div>`:`<button class="btn gold" data-act="joinpending">Entrar no time</button>`}`}</div>`;
+  }
+  const me=fb.user.uid; const ativo=activeTeam();
+  for(const t of fb.teams){
+    const mem=fb.members[t.id]||[]; const souDono=t.dono===me; const link=inviteLink(t.id);
+    const ordenados=t.membros.map(uid=>mem.find(m=>m.uid===uid)||{uid,nick:"",owned:[]});
+    h+=`<div class="panel stack teamcard ${ativo&&ativo.id===t.id?"on":""}" style="gap:12px">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div><h3>${esc(t.nome)}</h3><div class="sub">Código <b class="code">${esc(t.id)}</b> · ${t.membros.length} de 3</div></div>
+        ${ativo&&ativo.id===t.id?`<span class="chip g">Usando no draft</span>`:`<button class="btn small" data-act="useteam" data-v="${t.id}">Usar no draft</button>`}</div>
+      <div class="rows">${ordenados.map(m=>`<div class="row"><span class="avatar sm" aria-hidden="true">${esc(((m.nick||"?").trim()[0]||"?").toUpperCase())}</span><span class="nm">${esc(m.nick||"Sem nick")}${m.uid===me?' <span class="muted">(você)</span>':""}${m.uid===t.dono?' <span class="chip y">dono</span>':""}</span><span class="val">${(m.owned||[]).length} upado${(m.owned||[]).length===1?"":"s"}</span></div>`).join("")}</div>
+      ${t.membros.length<3?`<div class="invite"><div class="sub">Convide até ${3-t.membros.length} amigo${3-t.membros.length>1?"s":""}:</div><div class="sel">${esc(link)}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" data-act="copyinv" data-v="${t.id}">Copiar convite</button><a class="btn small" href="https://wa.me/?text=${encodeURIComponent("Entra no meu time no Brawl Picks pra gente montar o draft junto: "+link)}" target="_blank" rel="noopener">Mandar no WhatsApp</a></div></div>`:""}
+      <button class="x" data-act="leave" data-v="${t.id}">${state.confirm==="t"+t.id?(souDono?"Toque de novo pra apagar o time":"Toque de novo pra sair"):(souDono?"Apagar time":"Sair do time")}</button></div>`;
+  }
+  if(fb.teams.length<5){
+    h+=`<div class="panel stack" style="gap:10px"><h3>${fb.teams.length?"Criar outro time":"Criar um time"}</h3>
+      <div class="field"><label for="teamname">Nome do time</label><input type="text" id="teamname" maxlength="30" placeholder="Ex.: Dupla do Ranked" value="${esc(state.newTeamName)}" autocomplete="off"></div>
+      <button class="btn gold" data-act="createteam">Criar time</button></div>`;
+  }
+  h+=`<div class="panel stack" style="gap:10px"><h3>Entrar com código</h3>
+    <div class="field"><label for="codein">Código de 6 letras</label><input type="text" id="codein" maxlength="6" placeholder="EX: K7M2QA" value="${esc(state.codeInput)}" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.15em"></div>
+    <button class="btn" data-act="joincode">Entrar</button></div></section>`;
+  return h;
+}
+function viewHist(){
+  const st=stats(); const pct=(o)=>Math.round(o.w/o.g*100);
+  let h=`<section class="stack"><h2>Seu histórico</h2>`;
+  if(!st.g){
+    return h+`<div class="panel stack" style="gap:8px"><b>Nenhuma partida ainda.</b><div class="sub">No fim do draft tem o quadro "Depois da partida": escolha o brawler que você jogou e toque em Ganhei ou Perdi. Aqui aparece sua taxa de vitória por brawler, modo e mapa.</div><button class="btn gold" data-act="tab" data-v="draft">Ir pro draft</button></div>
+      <div class="sub">${fb.user?"Suas partidas ficam salvas na sua conta Google.":"Entre com Google na aba Conta pra salvar as partidas na conta."}</div></section>`;
+  }
+  const bs=Object.entries(st.byB).sort((a,b)=>b[1].g-a[1].g||b[1].w-a[1].w);
+  const best=bs.filter(([,o])=>o.g>=3).sort((a,b)=>pct(b[1])-pct(a[1]))[0];
+  const bar=(o)=>`<span class="wbar"><span style="width:${pct(o)}%"></span></span>`;
+  h+=`<div class="tiles"><div class="tilebox"><span class="eyebrow">Partidas</span><b>${st.g}</b></div><div class="tilebox"><span class="eyebrow">Vitórias</span><b>${pct(st)}%</b><small>${st.w}V ${st.g-st.w}D</small></div><div class="tilebox"><span class="eyebrow">Seu melhor</span><b class="sm">${best?esc(best[0]):"—"}</b><small>${best?pct(best[1])+"% em "+best[1].g:"3 jogos num brawler"}</small></div></div>`;
+  h+=`<div class="panel"><div class="eyebrow">Por brawler</div><div class="rows">${bs.slice(0,15).map(([n,o])=>`<div class="row">${tile(n)}<span class="nm">${esc(n)}<br><span class="sub" style="font-weight:400">${o.w}V ${o.g-o.w}D</span></span>${bar(o)}<span class="val ${pct(o)>=50?"pos":""}">${pct(o)}%</span></div>`).join("")}</div></div>`;
+  const ms=Object.entries(st.byMode).sort((a,b)=>b[1].g-a[1].g);
+  h+=`<div class="grid2"><div class="panel"><div class="eyebrow">Por modo</div><div class="rows">${ms.map(([m,o])=>`<div class="row">${MODES[m]?micon(m):""}<span class="nm">${MODES[m]?MODES[m].nome:esc(m)}<br><span class="sub" style="font-weight:400">${o.g} partida${o.g>1?"s":""}</span></span>${bar(o)}<span class="val ${pct(o)>=50?"pos":""}">${pct(o)}%</span></div>`).join("")}</div></div>`;
+  const mp=Object.entries(st.byMap).sort((a,b)=>b[1].g-a[1].g).slice(0,8);
+  h+=`<div class="panel"><div class="eyebrow">Por mapa</div><div class="rows">${mp.map(([k,o])=>`<div class="row"><span class="nm">${esc(o.nome||k)}<br><span class="sub" style="font-weight:400">${o.w}V ${o.g-o.w}D</span></span>${bar(o)}<span class="val ${pct(o)>=50?"pos":""}">${pct(o)}%</span></div>`).join("")}</div></div></div>`;
+  h+=`<div class="panel"><div class="eyebrow">Últimas partidas</div><div class="rows">${state.matches.slice(0,20).map(m=>`<div class="row">${tile(m.brawler)}<span class="nm">${esc(m.brawler)} <span class="chip ${m.venceu?"g":"r"}">${m.venceu?"Vitória":"Derrota"}</span><br><span class="sub" style="font-weight:400">${esc(m.mapaNome||m.mapa)} · ${new Date(m.data).toLocaleDateString("pt-BR",{day:"numeric",month:"short"})}</span></span><button class="x" data-act="delm" data-v="${esc(m.id)}">${state.confirm==="m"+m.id?"Apagar?":"Apagar"}</button></div>`).join("")}</div></div>`;
+  h+=`<div class="sub">${fb.user?"Salvo na sua conta Google.":"Salvo neste aparelho. Entre com Google na aba Conta pra levar o histórico pra conta."}</div></section>`;
+  return h;
+}
+
 /* ======================= SELETOR DE BRAWLER ======================= */
 const sheet=document.getElementById("sheet"); let sheetSlot=null, sheetQ="", sheetF="Todos";
 function openSheet(slot){ sheetSlot=slot; sheetQ=""; sheetF="Todos"; drawSheet(); sheet.hidden=false; setTimeout(()=>{const i=document.getElementById("sq"); i&&i.focus();},30); }
 function closeSheet(){ sheet.hidden=true; sheetSlot=null; }
 function drawSheet(keepFocus){
-  const d=state.draft; const taken=new Set(Object.entries(d.picks).filter(([s,n])=>s!==sheetSlot&&n&&visibleSlots().includes(s)).map(([,n])=>n));
+  const d=state.draft; const isPlayed=sheetSlot==="PLAYED";
+  const taken=isPlayed?new Set():new Set(Object.entries(d.picks).filter(([s,n])=>s!==sheetSlot&&n&&visibleSlots().includes(s)).map(([,n])=>n));
   const q=sheetQ.trim().toLowerCase(); const list=ALL.filter(n=>(sheetF==="Todos"||CLS[n]===sheetF)&&(!q||n.toLowerCase().includes(q)));
-  const t=slotTeam(sheetSlot);
+  const t=isPlayed?null:slotTeam(sheetSlot);
   const grid=`<div class="bgrid">${list.map(n=>`<button class="bcell" data-act="pickb" data-v="${esc(n)}" ${taken.has(n)?"disabled":""}>${tile(n)}<span>${esc(n)}</span></button>`).join("")||'<div class="sub">Nada encontrado.</div>'}</div>`;
   if(keepFocus){ document.getElementById("sbody").innerHTML=grid; document.querySelectorAll("#sfil .fchip").forEach(b=>b.classList.toggle("on",b.dataset.v===sheetF)); return; }
   sheet.innerHTML=`<div class="sheet" data-act="closebg"><div class="sheet-in" role="dialog" aria-modal="true" aria-label="Escolher brawler">
-    <div class="sheet-h"><h3 style="color:var(${t==="a"?"--ally":"--enemy"})">${t==="a"?"Pick do aliado":"Pick do inimigo"} · ${ORDER.indexOf(sheetSlot)+1}º</h3>
-    <div style="display:flex;gap:6px">${d.picks[sheetSlot]?'<button class="btn small" data-act="clearslot">Limpar</button>':""}<button class="btn small" data-act="close">Fechar</button></div></div>
+    <div class="sheet-h"><h3 style="color:var(${isPlayed?"--ink":t==="a"?"--ally":"--enemy"})">${isPlayed?"Qual brawler você jogou?":(t==="a"?"Pick do aliado":"Pick do inimigo")+" · "+(ORDER.indexOf(sheetSlot)+1)+"º"}</h3>
+    <div style="display:flex;gap:6px">${!isPlayed&&d.picks[sheetSlot]?'<button class="btn small" data-act="clearslot">Limpar</button>':""}<button class="btn small" data-act="close">Fechar</button></div></div>
     <input type="search" id="sq" placeholder="Digite o nome" autocomplete="off">
     <div class="filters" id="sfil">${["Todos",...Object.keys(CLASSES)].map(c=>`<button class="fchip ${sheetF===c?"on":""}" data-act="sf" data-v="${c}">${c==="Todos"?"Todos":CLASS_LABEL[c]}</button>`).join("")}</div>
     <div class="sheet-body" id="sbody">${grid}</div></div></div>`;
@@ -675,13 +826,29 @@ document.addEventListener("click",e=>{
   const a=b.dataset.act, v=b.dataset.v, d=state.draft;
   if(a==="closebg"){ if(e.target===b) closeSheet(); return; }
   switch(a){
-    case "tab": state.tab=v; render(); window.scrollTo({top:0}); return;
-    case "map": d.map=+v; d.fp=null; d.pos=null; d.picks={}; d.hidden=[]; break;
+    case "tab": if(v==="up"||v==="tips"){ state.tab="meta"; state.metaSub=v; } else state.tab=v; state.confirm=null; render(); window.scrollTo({top:0}); return;
+    case "metasub": state.metaSub=v; break;
+    case "played": d.played=v; break;
+    case "playedother": openSheet("PLAYED"); return;
+    case "res": { const mo=MAPS[d.map]; const p=d.played||recommend().top[0]?.n; if(!p||!mo) return;
+      addMatch({mapa:mo.slug||mo.n,mapaNome:mo.n,modo:mo.m,brawler:p,venceu:v==="v",data:Date.now(),time:activeTeam()?.id||null});
+      d.savedMsg=`${v==="v"?"Vitória":"Derrota"} com ${p} salva no histórico. Se for melhor de 3, registre cada partida.`; break; }
+    case "delm": if(state.confirm!=="m"+v){ state.confirm="m"+v; break; } state.confirm=null; delMatch(v); break;
+    case "useteam": state.activeTeam=v; saveTeamLocal(); break;
+    case "copyinv": { const link=inviteLink(v); const done=()=>{ state.teamMsg="Convite copiado. É só colar pros amigos."; render(); };
+      if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(done,()=>{ state.teamMsg="Copie o link: "+link; render(); });
+      else { state.teamMsg="Copie o link: "+link; } break; }
+    case "createteam": createTeam(); return;
+    case "joincode": joinTeam((state.codeInput||"").trim().toUpperCase()); return;
+    case "joinpending": joinTeam(state.joinCode); return;
+    case "leave": if(state.confirm!=="t"+v){ state.confirm="t"+v; break; } state.confirm=null; leaveTeam(v); return;
+    case "install": installApp(); return;
+    case "map": d.map=+v; d.fp=null; d.pos=null; d.picks={}; d.hidden=[]; d.played=null; d.savedMsg=null; break;
     case "fp": d.fp=v; d.pos=null; d.picks={}; break;
     case "pos": d.pos=+v; d.picks={}; break;
     case "reset": if(v==="map"){d.map=null;d.fp=null;d.pos=null;} if(v==="fp"){d.fp=null;d.pos=null;} if(v==="pos"){d.pos=null;} d.picks={}; d.hidden=[]; break;
     case "slot": openSheet(v); return;
-    case "pickb": d.picks[sheetSlot]=v; closeSheet(); break;
+    case "pickb": if(sheetSlot==="PLAYED") d.played=v; else d.picks[sheetSlot]=v; closeSheet(); break;
     case "clearslot": delete d.picks[sheetSlot]; closeSheet(); break;
     case "close": closeSheet(); return;
     case "sf": sheetF=v; drawSheet(true); return;
@@ -706,6 +873,8 @@ document.addEventListener("input",e=>{
     const list=ALL.filter(n=>(f==="Todos"||CLS[n]===f)&&(!q||n.toLowerCase().includes(q)));
     g.innerHTML=list.map(n=>`<button class="bcell ${own.has(n)?"on":""}" data-act="own" data-v="${esc(n)}" aria-pressed="${own.has(n)}">${tile(n)}<span>${esc(n)}</span></button>`).join("")||'<div class="sub">Nenhum brawler com esse nome.</div>';
     const sb=document.querySelector('[data-act="selall"]'); if(sb) sb.textContent=`Marcar estes ${list.length}`; }
+  if(e.target.id==="teamname"){ state.newTeamName=e.target.value.slice(0,30); }
+  if(e.target.id==="codein"){ state.codeInput=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6); e.target.value=state.codeInput; }
   if(e.target.id==="nick"){ state.profile.nick=e.target.value.slice(0,24); renderHello(); persist(); }
 });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!sheet.hidden) closeSheet(); });
@@ -771,7 +940,7 @@ const FIREBASE_CONFIG = {
   appId: "1:1090029222149:web:7d0cc7225ca3510c1adf6c"
 };
 const FB_VER = "10.12.2";
-const fb = {ready:false,user:null,msg:"",timer:null,writing:false,pending:false};
+const fb = {ready:false,user:null,msg:"",timer:null,writing:false,pending:false,teams:[],members:{},subs:{},unsubs:[],joinInfo:undefined};
 const ERROS_LOGIN = {
   "auth/unauthorized-domain":"Esse endereço não está autorizado no Firebase.",
   "auth/network-request-failed":"Sem internet no momento. Tente de novo.",
@@ -797,10 +966,105 @@ async function fbFlush(){
   const F=fb.mods.fs;
   try{
     await F.setDoc(F.doc(fb.db,"usuarios",fb.user.uid),{nick:state.profile.nick,owned:state.profile.owned,buffies:state.profile.buffies||[],atualizado:F.serverTimestamp()});
+    for(const t of fb.teams) await F.setDoc(F.doc(fb.db,"times",t.id,"membros",fb.user.uid),memberData());
     setSync("fb");
   }catch(e){ setSync("local"); }
   fb.writing=false; if(fb.pending){ fb.pending=false; fbFlush(); }
 }
+function memberData(){ return {nick:state.profile.nick||"",owned:state.profile.owned,buffies:state.profile.buffies||[],atualizado:fb.mods.fs.serverTimestamp()}; }
+const CODE_ABC="ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const novoCodigo=()=>Array.from({length:6},()=>CODE_ABC[Math.floor(Math.random()*CODE_ABC.length)]).join("");
+function teamMsg(t){ state.teamMsg=t; render(); }
+async function createTeam(){
+  if(!fb.user) return;
+  const F=fb.mods.fs; const nome=(state.newTeamName||"").trim();
+  if(!nome) return teamMsg("Dê um nome pro time.");
+  try{
+    let id=null;
+    for(let i=0;i<6&&!id;i++){ const c=novoCodigo(); const snap=await F.getDoc(F.doc(fb.db,"times",c)); if(!snap.exists()) id=c; }
+    if(!id) return teamMsg("Não deu pra criar agora. Tente de novo.");
+    await F.setDoc(F.doc(fb.db,"times",id),{nome,dono:fb.user.uid,membros:[fb.user.uid],criado:F.serverTimestamp()});
+    await F.setDoc(F.doc(fb.db,"times",id,"membros",fb.user.uid),memberData());
+    state.newTeamName=""; state.activeTeam=id; saveTeamLocal();
+    teamMsg(`Time criado! Agora mande o convite pros amigos.`);
+  }catch(e){ teamMsg("Não deu pra criar o time. Confira se as regras do Firestore foram publicadas."); }
+}
+async function joinTeam(code){
+  if(!fb.user||!code) return;
+  if(!/^[A-Z0-9]{6}$/.test(code)) return teamMsg("O código tem 6 letras e números.");
+  const F=fb.mods.fs; const ref=F.doc(fb.db,"times",code);
+  try{
+    const snap=await F.getDoc(ref);
+    if(!snap.exists()) return teamMsg("Não achei esse time. Confira o código.");
+    const t=snap.data();
+    if(t.membros.includes(fb.user.uid)){ state.joinCode=null; clearHash(); return teamMsg("Você já está nesse time."); }
+    if(t.membros.length>=3) return teamMsg("Esse time já está cheio.");
+    await F.updateDoc(ref,{membros:F.arrayUnion(fb.user.uid)});
+    await F.setDoc(F.doc(fb.db,"times",code,"membros",fb.user.uid),memberData());
+    state.joinCode=null; state.codeInput=""; state.activeTeam=code; saveTeamLocal(); clearHash();
+    teamMsg(`Você entrou no ${t.nome}!`);
+  }catch(e){ teamMsg("Não deu pra entrar no time. Tente de novo."); }
+}
+async function leaveTeam(id){
+  const F=fb.mods.fs; const t=fb.teams.find(x=>x.id===id); if(!t) return;
+  try{
+    if(t.dono===fb.user.uid){
+      for(const uid of t.membros){ try{ await F.deleteDoc(F.doc(fb.db,"times",id,"membros",uid)); }catch(e){} }
+      await F.deleteDoc(F.doc(fb.db,"times",id));
+      teamMsg("Time apagado.");
+    } else {
+      await F.deleteDoc(F.doc(fb.db,"times",id,"membros",fb.user.uid));
+      await F.updateDoc(F.doc(fb.db,"times",id),{membros:F.arrayRemove(fb.user.uid)});
+      teamMsg("Você saiu do time.");
+    }
+    if(state.activeTeam===id){ state.activeTeam=null; saveTeamLocal(); }
+  }catch(e){ teamMsg("Não deu pra fazer isso agora. Tente de novo."); }
+}
+async function addMatch(m){
+  if(fb.user){
+    try{ await fb.mods.fs.addDoc(fb.mods.fs.collection(fb.db,"usuarios",fb.user.uid,"partidas"),m); return; }catch(e){}
+  }
+  m.id="l"+Date.now()+Math.random().toString(36).slice(2,6);
+  state.matches=[m,...state.matches]; saveLocalMatches(state.matches); render();
+}
+async function delMatch(id){
+  if(fb.user && !String(id).startsWith("l")){
+    try{ await fb.mods.fs.deleteDoc(fb.mods.fs.doc(fb.db,"usuarios",fb.user.uid,"partidas",id)); }catch(e){}
+    return;
+  }
+  state.matches=state.matches.filter(m=>m.id!==id); saveLocalMatches(state.matches); render();
+}
+function unsubscribeAll(){ fb.unsubs.forEach(u=>{try{u();}catch(e){}}); fb.unsubs=[]; Object.values(fb.subs).forEach(u=>{try{u();}catch(e){}}); fb.subs={}; fb.teams=[]; fb.members={}; }
+function subscribeUser(u){
+  const F=fb.mods.fs;
+  fb.unsubs.push(F.onSnapshot(F.query(F.collection(fb.db,"times"),F.where("membros","array-contains",u.uid)),snap=>{
+    const antes=fb.teams.map(t=>t.id).sort().join();
+    fb.teams=snap.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>a.nome.localeCompare(b.nome));
+    const ids=new Set(fb.teams.map(t=>t.id));
+    for(const id of Object.keys(fb.subs)) if(!ids.has(id)){ fb.subs[id](); delete fb.subs[id]; delete fb.members[id]; }
+    for(const id of ids) if(!fb.subs[id]) fb.subs[id]=F.onSnapshot(F.collection(fb.db,"times",id,"membros"),ms=>{ fb.members[id]=ms.docs.map(d=>Object.assign({uid:d.id},d.data())); if(state.tab!=="account") render(); },()=>{});
+    if(antes!==fb.teams.map(t=>t.id).sort().join() && fb.teams.length) fbFlush();
+    render();
+  },()=>{}));
+  fb.unsubs.push(F.onSnapshot(F.query(F.collection(fb.db,"usuarios",u.uid,"partidas"),F.orderBy("data","desc"),F.limit(500)),snap=>{
+    state.matches=snap.docs.map(d=>Object.assign({id:d.id},d.data())).filter(m=>CLS[m.brawler]); render();
+  },()=>{}));
+}
+async function migrateLocalMatches(u){
+  const locais=loadLocalMatches(); if(!locais.length) return;
+  const F=fb.mods.fs; const col=F.collection(fb.db,"usuarios",u.uid,"partidas");
+  try{ for(const m of locais){ const c=Object.assign({},m); delete c.id; await F.addDoc(col,c); } saveLocalMatches([]); }catch(e){}
+}
+async function loadJoinInfo(){
+  if(!fb.ready||!state.joinCode) return;
+  fb.joinInfo=undefined;
+  try{ const snap=await fb.mods.fs.getDoc(fb.mods.fs.doc(fb.db,"times",state.joinCode)); fb.joinInfo=snap.exists()?snap.data():null; }catch(e){ fb.joinInfo=null; }
+  render();
+}
+function clearHash(){ try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} }
+function readHash(){ const m=/^#entrar-([A-Za-z0-9]{6})$/.exec(location.hash||""); if(m){ state.joinCode=m[1].toUpperCase(); state.tab="team"; if(fb.user) loadJoinInfo(); render(); } }
+window.addEventListener("hashchange",readHash);
+readHash();
 (async()=>{
   try{
     const base=`https://www.gstatic.com/firebasejs/${FB_VER}/`;
@@ -818,7 +1082,13 @@ async function fbFlush(){
           if(snap.exists()){ state.profile=cleanProfile(snap.data(),primeiro); saveLocal(); setSync("fb"); }
           else { if(!state.profile.nick) state.profile.nick=primeiro; saveLocal(); await fbFlush(); }
         }catch(e){ setSync("local"); }
-      } else if(state.sync==="fb"||state.sync==="loading"){ setSync("local"); }
+        await migrateLocalMatches(u);
+        subscribeUser(u);
+        if(state.joinCode) loadJoinInfo();
+      } else {
+        unsubscribeAll(); state.matches=loadLocalMatches();
+        if(state.sync==="fb"||state.sync==="loading") setSync("local");
+      }
       render();
     });
     render();
