@@ -112,8 +112,9 @@ def main():
         confiaveis = sorted([t for t in tabela if t[2] >= MIN_ESCOLHA], key=lambda t: -t[1])[:TOP]
         print(f"  {modo:6} {nome:28} {len(tabela):3} brawlers | " +
               ", ".join(f"{n} {wr}" for n, wr, _ in confiaveis[:3]))
+        todos = {n: wr for n, wr, esc in tabela if esc >= 0.5}
         mapas.append({"slug": slug, "modo": modo, "nome": nome,
-                      "top": [[n, wr, esc] for n, wr, esc in confiaveis]})
+                      "top": [[n, wr, esc] for n, wr, esc in confiaveis], "todos": todos})
         time.sleep(1)
 
     com_dados = sum(1 for m in mapas if m["top"])
