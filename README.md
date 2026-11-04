@@ -25,6 +25,16 @@ O site é um arquivo só: `index.html`. Pra colocar no ar:
 - **GitHub Pages:** Settings → Pages → Deploy from a branch → `main` / root.
 - **Netlify:** importar o repositório, sem comando de build.
 
+## Mapas da temporada
+
+`bot/mapas.py` roda todo dia e lê a página da ranqueada do
+[Brawl Planet](https://www.brawlplanet.com/pt-br/powerleague) em português. Ele
+pega só os mapas da rotação atual, com o nome oficial em PT-BR e a taxa de
+vitória de cada brawler na ranqueada (Diamante 1 pra cima), e salva em
+`data/mapas.json`. O site lê esse arquivo quando abre, então quando a temporada
+virar os mapas mudam sozinhos. Se o pool mudar, ele abre uma issue dizendo quais
+mapas entraram e saíram.
+
 ## Vigia
 
 `bot/vigia.py` roda todo dia pelo GitHub Actions e abre uma issue quando sai

@@ -234,37 +234,47 @@ ALL.sort((a,b)=>a.localeCompare(b));
 const abbr = n => n.replace(/[^A-Za-z0-9 ]/g," ").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase().padEnd(2, n[1]?n[1].toUpperCase():"");
 
 const MODES = {
-  gem:{nome:"Pique-Gema",cor:"--m-gem"}, ball:{nome:"Futebrawl",cor:"--m-ball"}, zone:{nome:"Zona Estratégica",cor:"--m-zone"},
-  heist:{nome:"Roubo",cor:"--m-heist"}, bounty:{nome:"Caça-Estelar",cor:"--m-bounty"}, ko:{nome:"Nocaute",cor:"--m-ko"}
+  gem:{nome:"Pique-Gema",cor:"--m-gem"}, ball:{nome:"Fute-Brawl",cor:"--m-ball"}, zone:{nome:"Zona Estratégica",cor:"--m-zone"},
+  heist:{nome:"Roubo",cor:"--m-heist"}, bounty:{nome:"Caça-Estrelas",cor:"--m-bounty"}, ko:{nome:"Nocaute",cor:"--m-ko"}
 };
-/* Top 3 de cada mapa do ranked: vantagem de vitória (Brawl Time Ninja, ranked, atualizado em 1 nov 2026) */
+/* Mapas da temporada atual da ranked: nome oficial em PT-BR e taxa de vitória na ranqueada
+   Diamante 1 pra cima (Brawl Planet). t = [brawler, vitória - 50, vitória]. */
+const MAPS_INFO = {atualizado:"2026-11-04T00:47Z", fonte:"Brawl Planet, ranqueada Diamante 1 pra cima"};
 const MAPS = [
-  {m:"gem",n:"Double Swoosh",t:[["Bolt",6.8],["Amber",5.3],["Clancy",5.0]]},
-  {m:"gem",n:"Gem Fort",t:[["Bolt",7.6],["Tara",6.6],["Clancy",6.1]]},
-  {m:"gem",n:"Hard Rock Mine",t:[["Bolt",7.1],["Ash",6.1],["Bo",5.3]]},
-  {m:"gem",n:"Undermine",t:[["Bo",6.4],["Bolt",6.1],["Tara",5.5]]},
-  {m:"ball",n:"Center Stage",t:[["Rosa",6.1],["Jacky",6.1],["Amber",6.0]]},
-  {m:"ball",n:"Pinball Dreams",t:[["Shade",7.0],["Amber",5.7],["Jacky",5.6]]},
-  {m:"ball",n:"Sneaky Fields",t:[["Jacky",6.3],["Amber",4.6],["Rosa",4.3]]},
-  {m:"ball",n:"Triple Dribble",t:[]},
-  {m:"zone",n:"Dueling Beetles",t:[["Amber",7.6],["Bo",6.8],["Rosa",6.0]]},
-  {m:"zone",n:"Open Business",t:[["Rosa",7.6],["Amber",7.0],["Jessie",6.4]]},
-  {m:"zone",n:"Parallel Plays",t:[["Juju",8.9],["Doug",6.1],["R-T",5.5]]},
-  {m:"zone",n:"Ring of Fire",t:[]},
-  {m:"heist",n:"Bridge Too Far",t:[["8-Bit",8.7],["Shade",7.3],["Wendy",6.3]]},
-  {m:"heist",n:"Hot Potato",t:[["Nita",8.9],["Bibi",7.9],["Edgar",7.2]]},
-  {m:"heist",n:"Kaboom Canyon",t:[["Nori",7.9],["Nita",7.5],["Bibi",7.2]]},
-  {m:"heist",n:"Safe Zone",t:[]},
-  {m:"bounty",n:"Dry Season",t:[["Bolt",7.6],["Bo",7.3],["Janet",7.2]]},
-  {m:"bounty",n:"Hideout",t:[["Bolt",7.4],["Bo",7.3],["Janet",5.6]]},
-  {m:"bounty",n:"Layer Cake",t:[["Bolt",7.0],["Bo",6.8],["Janet",6.8]]},
-  {m:"bounty",n:"Shooting Star",t:[]},
-  {m:"ko",n:"Belle's Rock",t:[["Grom",6.8],["Edgar",5.7],["Wendy",4.4]]},
-  {m:"ko",n:"Flaring Phoenix",t:[["Pearl",7.0],["Edgar",6.5],["Grom",6.1]]},
-  {m:"ko",n:"Flowing Springs",t:[["Wendy",6.9],["Grom",5.6],["Pearl",5.5]]},
-  {m:"ko",n:"Goldarm Gulch",t:[]},
-  {m:"ko",n:"New Horizons",t:[]},
-  {m:"ko",n:"Out in the Open",t:[]}
+  {"m": "gem", "n": "Arco duplo", "slug": "doubleswoosh_gemgrab", "t": [["Bolt", 11.6, 61.6], ["Amber", 6.6, 56.6], ["Wendy", 6.2, 56.2], ["Rosa", 6.1, 56.1], ["Tara", 6.1, 56.1], ["Clancy", 5.4, 55.4], ["Ash", 5.3, 55.3], ["Bo", 4.5, 54.5]]},
+  {"m": "gem", "n": "Forte de gemas", "slug": "gemfort_gemgrab", "t": [["Bolt", 12.3, 62.3], ["Wendy", 7.3, 57.3], ["Amber", 5.8, 55.8], ["Ash", 5.5, 55.5], ["Shade", 5.4, 55.4], ["Tara", 5.2, 55.2], ["Rosa", 4.8, 54.8], ["Clancy", 4.6, 54.6]]},
+  {"m": "gem", "n": "Mina rochosa", "slug": "hardrockmine_gemgrab", "t": [["Bolt", 8.8, 58.8], ["Shade", 8.3, 58.3], ["Ash", 7.0, 57.0], ["Wendy", 5.9, 55.9], ["Rico", 4.9, 54.9], ["Amber", 4.6, 54.6], ["Rosa", 4.5, 54.5], ["Bo", 4.3, 54.3]]},
+  {"m": "gem", "n": "Fliperama rústico", "slug": "rusticarcade_gemgrab", "t": [["Bolt", 16.6, 66.6], ["Clancy", 8.7, 58.7], ["Mr. P", 7.5, 57.5], ["Bo", 7.0, 57.0], ["Jessie", 5.4, 55.4], ["8-Bit", 5.2, 55.2], ["Stu", 4.6, 54.6], ["Pearl", 4.5, 54.5]]},
+  {"m": "gem", "n": "Ilumina", "slug": "undermine_gemgrab", "t": [["Bolt", 10.1, 60.1], ["Wendy", 9.9, 59.9], ["Amber", 7.6, 57.6], ["Shade", 6.4, 56.4], ["Ash", 5.1, 55.1], ["Tara", 4.6, 54.6], ["Gus", 4.5, 54.5], ["Bo", 4.0, 54.0]]},
+  {"m": "ball", "n": "Bola na orla", "slug": "beachball_brawlball", "t": [["Amber", 13.5, 63.5], ["Shade", 13.3, 63.3], ["Wendy", 11.4, 61.4], ["Gus", 8.6, 58.6], ["El Primo", 7.7, 57.7], ["Ash", 6.9, 56.9], ["Bibi", 3.5, 53.5], ["Emz", 3.1, 53.1]]},
+  {"m": "ball", "n": "Centro do palco", "slug": "centerstage_brawlball", "t": [["Shade", 9.0, 59.0], ["Jacky", 8.8, 58.8], ["Amber", 8.4, 58.4], ["Rosa", 6.5, 56.5], ["Ash", 6.4, 56.4], ["Doug", 5.1, 55.1], ["El Primo", 5.1, 55.1], ["Bibi", 4.4, 54.4]]},
+  {"m": "ball", "n": "Pintando o pinball", "slug": "pinballdreams_brawlball", "t": [["Shade", 10.4, 60.4], ["Amber", 8.8, 58.8], ["Ash", 6.9, 56.9], ["Wendy", 6.0, 56.0], ["Larry & Lawrie", 5.9, 55.9], ["El Primo", 5.2, 55.2], ["Bibi", 4.8, 54.8], ["Gus", 4.6, 54.6]]},
+  {"m": "ball", "n": "Tiro de meta", "slug": "pinholepunt_brawlball", "t": [["Jacky", 9.0, 59.0], ["Buster", 8.4, 58.4], ["Charlie", 7.1, 57.1], ["Ollie", 6.6, 56.6], ["Doug", 6.5, 56.5], ["Draco", 6.3, 56.3], ["Tara", 6.3, 56.3], ["Bibi", 5.0, 55.0]]},
+  {"m": "ball", "n": "Campos ardilosos", "slug": "sneakyfields_brawlball", "t": [["Jacky", 8.2, 58.2], ["Amber", 8.1, 58.1], ["Rosa", 7.1, 57.1], ["R-T", 5.4, 55.4], ["Ash", 5.2, 55.2], ["Shade", 4.7, 54.7], ["El Primo", 4.6, 54.6], ["Bibi", 4.5, 54.5]]},
+  {"m": "ball", "n": "Espiralada", "slug": "spiralingout_brawlball", "t": [["Wendy", 12.5, 62.5], ["Amber", 11.8, 61.8], ["Shade", 9.4, 59.4], ["Ash", 7.8, 57.8], ["Gus", 7.7, 57.7], ["Jacky", 6.9, 56.9], ["El Primo", 5.2, 55.2], ["Bibi", 5.0, 55.0]]},
+  {"m": "ball", "n": "Drible triplo", "slug": "tripledribble_brawlball", "t": [["Amber", 9.1, 59.1], ["Jacky", 7.0, 57.0], ["Shade", 7.0, 57.0], ["Larry & Lawrie", 6.8, 56.8], ["El Primo", 5.1, 55.1], ["Bibi", 4.9, 54.9], ["Wendy", 4.7, 54.7], ["Ash", 4.4, 54.4]]},
+  {"m": "bounty", "n": "Estação seca", "slug": "dryseason_bounty", "t": [["Bolt", 12.1, 62.1], ["Amber", 8.5, 58.5], ["Mr. P", 7.9, 57.9], ["Wendy", 7.9, 57.9], ["Shade", 5.3, 55.3], ["Sprout", 5.2, 55.2], ["Brock", 4.8, 54.8], ["Carl", 3.7, 53.7]]},
+  {"m": "bounty", "n": "Tocaia", "slug": "hideout_bounty", "t": [["Bolt", 11.4, 61.4], ["Amber", 8.6, 58.6], ["Wendy", 7.8, 57.8], ["Mr. P", 5.4, 55.4], ["Sprout", 4.0, 54.0], ["Brock", 3.7, 53.7], ["Pearl", 3.4, 53.4], ["Gus", 3.3, 53.3]]},
+  {"m": "bounty", "n": "Bolo em camadas", "slug": "layercake_bounty", "t": [["Bolt", 11.8, 61.8], ["Amber", 8.2, 58.2], ["Mr. P", 6.3, 56.3], ["Brock", 6.0, 56.0], ["Wendy", 5.6, 55.6], ["Carl", 4.3, 54.3], ["Penny", 3.9, 53.9], ["Ash", 3.2, 53.2]]},
+  {"m": "bounty", "n": "Campo de tiro", "slug": "shootingstar_bounty", "t": [["Bolt", 10.7, 60.7], ["Wendy", 9.6, 59.6], ["Amber", 7.2, 57.2], ["Sprout", 6.5, 56.5], ["Mr. P", 6.2, 56.2], ["Grom", 5.8, 55.8], ["Brock", 3.9, 53.9], ["Najia", 3.7, 53.7]]},
+  {"m": "heist", "n": "Ponte inalcançável", "slug": "bridgetoofar_heist", "t": [["Wendy", 11.8, 61.8], ["Nori", 11.7, 61.7], ["Shade", 10.2, 60.2], ["8-Bit", 9.3, 59.3], ["Colt", 4.9, 54.9], ["Eve", 4.9, 54.9], ["Amber", 3.8, 53.8], ["Bibi", 3.8, 53.8]]},
+  {"m": "heist", "n": "Batata quente", "slug": "hotpotato_heist", "t": [["Bibi", 10.4, 60.4], ["Nori", 10.0, 60.0], ["Shade", 10.0, 60.0], ["Nita", 8.4, 58.4], ["Bull", 5.7, 55.7], ["Edgar", 5.1, 55.1], ["Carl", 4.6, 54.6], ["Melodie", 4.3, 54.3]]},
+  {"m": "heist", "n": "Ravina kabum", "slug": "kaboomcanyon_heist", "t": [["Nori", 12.6, 62.6], ["Shade", 9.1, 59.1], ["Wendy", 8.2, 58.2], ["Bibi", 6.2, 56.2], ["Amber", 6.1, 56.1], ["Melodie", 6.1, 56.1], ["Nita", 5.0, 55.0], ["Mico", 4.3, 54.3]]},
+  {"m": "heist", "n": "Pit stop", "slug": "pitstop_heist", "t": [["Nori", 12.3, 62.3], ["Bibi", 9.7, 59.7], ["Edgar", 7.5, 57.5], ["Mico", 7.4, 57.4], ["Shade", 6.5, 56.5], ["Nita", 6.4, 56.4], ["Gigi", 6.3, 56.3], ["Bull", 6.1, 56.1]]},
+  {"m": "heist", "n": "Zona segura", "slug": "safezone_heist", "t": [["Nori", 12.3, 62.3], ["Shade", 12.2, 62.2], ["Bolt", 8.1, 58.1], ["Wendy", 7.7, 57.7], ["Amber", 5.9, 55.9], ["Chuck", 5.9, 55.9], ["Melodie", 5.7, 55.7], ["Jessie", 5.2, 55.2]]},
+  {"m": "heist", "n": "Zona de proteção", "slug": "safe(r)zone_heist", "t": [["Nori", 12.8, 62.8], ["Chuck", 10.7, 60.7], ["Bolt", 9.4, 59.4], ["Mico", 9.0, 59.0], ["Shade", 5.8, 55.8], ["Carl", 5.4, 55.4], ["Melodie", 5.0, 55.0], ["Bibi", 4.4, 54.4]]},
+  {"m": "zone", "n": "Besouros brigões", "slug": "duelingbeetles_hotzone", "t": [["Amber", 11.6, 61.6], ["Wendy", 8.7, 58.7], ["Ash", 6.6, 56.6], ["Kenji", 6.4, 56.4], ["Bibi", 5.8, 55.8], ["Doug", 5.8, 55.8], ["Gus", 5.6, 55.6], ["Bolt", 5.3, 55.3]]},
+  {"m": "zone", "n": "No liminar", "slug": "intheliminal_hotzone", "t": [["Amber", 13.3, 63.3], ["Ash", 9.2, 59.2], ["Wendy", 9.0, 59.0], ["Glowy", 8.8, 58.8], ["Kenji", 6.6, 56.6], ["Poco", 6.3, 56.3], ["Starr Nova", 6.3, 56.3], ["Bo", 5.6, 55.6]]},
+  {"m": "zone", "n": "Aberto", "slug": "openbusiness_hotzone", "t": [["Amber", 10.6, 60.6], ["Wendy", 9.0, 59.0], ["Ash", 8.8, 58.8], ["Hank", 7.9, 57.9], ["Kenji", 6.8, 56.8], ["Nita", 6.6, 56.6], ["Sandy", 6.6, 56.6], ["Jessie", 6.3, 56.3]]},
+  {"m": "zone", "n": "Jogadas paralelas", "slug": "parallelplays_hotzone", "t": [["Juju", 9.1, 59.1], ["R-T", 7.3, 57.3], ["Bibi", 7.1, 57.1], ["Doug", 6.5, 56.5], ["Hank", 5.5, 55.5], ["Sirius", 4.6, 54.6], ["Amber", 4.5, 54.5], ["Gus", 4.4, 54.4]]},
+  {"m": "zone", "n": "Viagem rápida", "slug": "quicktravel_hotzone", "t": [["Nita", 11.6, 61.6], ["Ash", 7.5, 57.5], ["Sirius", 6.7, 56.7], ["Rosa", 5.9, 55.9], ["Shade", 5.7, 55.7], ["R-T", 5.0, 55.0], ["Bibi", 4.7, 54.7], ["Emz", 4.7, 54.7]]},
+  {"m": "zone", "n": "Anel de fogo", "slug": "ringoffire_hotzone", "t": [["Wendy", 15.2, 65.2], ["Amber", 11.4, 61.4], ["Bolt", 10.6, 60.6], ["Ash", 9.3, 59.3], ["Bo", 7.7, 57.7], ["Draco", 7.7, 57.7], ["Clancy", 6.6, 56.6], ["Kenji", 6.5, 56.5]]},
+  {"m": "ko", "n": "Rocha da Belle", "slug": "bellesrock_knockout", "t": [["Bolt", 7.3, 57.3], ["Brock", 6.6, 56.6], ["Wendy", 6.4, 56.4], ["Sprout", 6.2, 56.2], ["Grom", 5.0, 55.0], ["Ollie", 4.7, 54.7], ["Shade", 4.6, 54.6], ["Edgar", 4.5, 54.5]]},
+  {"m": "ko", "n": "Fênix flamejante", "slug": "flaringphoenix_knockout", "t": [["Doug", 7.5, 57.5], ["Pearl", 7.4, 57.4], ["Brock", 7.0, 57.0], ["Edgar", 6.5, 56.5], ["Wendy", 6.4, 56.4], ["Grom", 6.3, 56.3], ["Bolt", 6.0, 56.0], ["Buster", 5.4, 55.4]]},
+  {"m": "ko", "n": "Fontes fartas", "slug": "flowingsprings_knockout", "t": [["Wendy", 8.1, 58.1], ["Najia", 7.5, 57.5], ["Grom", 7.3, 57.3], ["Mr. P", 6.7, 56.7], ["Sprout", 6.3, 56.3], ["Brock", 6.2, 56.2], ["Angelo", 4.6, 54.6], ["Tick", 3.9, 53.9]]},
+  {"m": "ko", "n": "Caverna do braço dourado", "slug": "goldarmgulch_knockout", "t": [["Pearl", 8.4, 58.4], ["Frank", 7.2, 57.2], ["Wendy", 6.5, 56.5], ["Brock", 6.2, 56.2], ["Mr. P", 5.9, 55.9], ["Grom", 4.7, 54.7], ["Emz", 4.0, 54.0], ["Sprout", 3.9, 53.9]]},
+  {"m": "ko", "n": "Novos horizontes", "slug": "newhorizons_knockout", "t": [["Wendy", 9.7, 59.7], ["Sprout", 7.2, 57.2], ["Bolt", 7.1, 57.1], ["Brock", 6.1, 56.1], ["Pearl", 6.1, 56.1], ["Doug", 4.1, 54.1], ["Ollie", 4.1, 54.1], ["Edgar", 3.9, 53.9]]},
+  {"m": "ko", "n": "Descampado", "slug": "outintheopen_knockout", "t": [["Wendy", 10.7, 60.7], ["Pearl", 8.3, 58.3], ["Brock", 7.9, 57.9], ["Bolt", 6.1, 56.1], ["Amber", 4.6, 54.6], ["Mr. P", 4.2, 54.2], ["Angelo", 3.5, 53.5], ["Doug", 3.4, 53.4]]}
 ];
 /* Por modo (Brawl Time Ninja, 1 nov 2026): "fortes" = vantagem com prática; "fáceis" = vantagem sem prática; "taxa" = top 11 por taxa de vitória da temporada */
 const MODE_DATA = {
@@ -348,7 +358,7 @@ const modeVal = (list,n) => { const f=list.find(x=>x[0]===n); return f?f[1]:0; }
 function baseScore(n, mapObj){
   const md = MODE_DATA[mapObj.m]; const why=[]; let s=0;
   const mp = modeVal(mapObj.t,n);
-  if(mp){ s+=mp; why.push(["g",`+${fmt(mp)}% neste mapa`]); }
+  if(mp){ s+=mp; const e=mapObj.t.find(x=>x[0]===n); why.push(["g",`${fmt(e[2])}% de vitória no mapa`]); }
   const forte = modeVal(md.fortes,n), facil = modeVal(md.faceis,n);
   const mb = Math.max(forte, facil*0.9);
   if(mb){ s+=mb*0.7; why.push(["g", forte? `Top no ${MODES[mapObj.m].nome}` : `Fácil de ganhar no modo`]); }
@@ -441,13 +451,13 @@ function viewDraft(){
   if(d.map===null){
     h+=`<section class="panel step"><div class="step-h"><span class="num">1</span><h2>Qual é o mapa?</h2></div>
       <div class="modes">${Object.keys(MODES).map(m=>`<div><div class="mode-h">${micon(m)}<h3>${MODES[m].nome}</h3></div>
-      <div class="maps">${MAPS.map((x,i)=>x.m!==m?"":`<button class="map" data-act="map" data-v="${i}"><b>${esc(x.n)}</b><span>${x.t.length?"Top: "+x.t.map(t=>esc(t[0])).join(", "):"Usa dados do modo"}</span></button>`).join("")}</div></div>`).join("")}</div></section>`;
+      <div class="maps">${MAPS.map((x,i)=>x.m!==m?"":`<button class="map" data-act="map" data-v="${i}"><b>${esc(x.n)}</b><span>${x.t.length?"Top: "+x.t.slice(0,3).map(t=>esc(t[0])).join(", "):"Usa dados do modo"}</span></button>`).join("")}</div></div>`).join("")}</div></section>`;
     return h;
   }
   const mo=MAPS[d.map];
   h+=`<section class="panel step done"><div class="step-h"><span class="num">✓</span>${micon(mo.m)}<div><div class="eyebrow">${MODES[mo.m].nome}</div><div class="chosen">${esc(mo.n)}</div></div><button class="edit" data-act="reset" data-v="map">Trocar</button></div>
     ${mo.t.length?(()=>{const b=mo.t.find(t=>!PATCH.forte[t[0]])||mo.t[0];const skipped=mo.t.filter(t=>PATCH.forte[t[0]]&&t!==b).map(t=>t[0]);
-      return `<div class="sub">Ban que os dados indicam aqui: <b style="color:var(--ink)">${esc(b[0])}</b> (+${fmt(b[1])}% no mapa)${skipped.length?`. ${skipped.map(esc).join(" e ")} liderava, mas tomou nerf forte em ${PATCH.data}.`:""}</div>`;})():`<div class="sub">Esse mapa ainda não tem top 3 próprio nos dados. As sugestões usam os números do modo.</div>`}</section>`;
+      return `<div class="sub">Ban que os dados indicam aqui: <b style="color:var(--ink)">${esc(b[0])}</b> (${fmt(b[2])}% de vitória no mapa)${skipped.length?`. ${skipped.map(esc).join(" e ")} liderava, mas tomou nerf forte em ${PATCH.data}.`:""}</div>`;})():`<div class="sub">Esse mapa ainda não tem top 3 próprio nos dados. As sugestões usam os números do modo.</div>`}</section>`;
   /* 2 first pick */
   if(!d.fp){
     h+=`<section class="panel step"><div class="step-h"><span class="num">2</span><h2>Quem ficou com o first pick?</h2></div>
@@ -508,7 +518,7 @@ function viewResult(){
     h+=`<div class="panel stack" style="gap:10px"><h3>Pra sugerir aos amigos</h3><div class="sub">${partner&&slotTeam(partner)==="a"?"Seu parceiro escolhe junto com você, então combinem antes. ":""}Opções fortes no mapa com classe diferente da sua melhor escolha.</div>
       <div class="friends">${fr.map(x=>`<span class="fr">${tile(x.n)}${esc(x.n)}</span>`).join("")}</div></div>`;
   }
-  h+=`<div class="src">A pontuação junta a vantagem de vitória no mapa, no modo e no ranked (Brawl Time Ninja, 1 nov) com o tier por vitória (Brawl Planet). Esses números são de antes do balanceamento de ${PATCH.data}: nerf forte corta a pontuação pela metade, nerf leve tira 20% e buff soma um pouco, até sair dado novo. O "bom contra" é regra geral de classe, não estatística de confronto.</div>
+  h+=`<div class="src">A pontuação junta a taxa de vitória no mapa (Brawl Planet, ranqueada Diamante 1 pra cima, ${esc(mapsDate())}), a força no modo e no ranked (Brawl Time Ninja, 1 nov) e o tier por vitória (Brawl Planet). Boa parte desses números ainda é de antes do balanceamento de ${PATCH.data}: nerf forte corta a pontuação pela metade, nerf leve tira 20% e buff soma um pouco, até sair dado novo. O "bom contra" é regra geral de classe, não estatística de confronto.</div>
     <button class="btn" data-act="newdraft">Novo draft</button></section>`;
   return h;
 }
@@ -542,8 +552,8 @@ function viewMeta(){
      <div class="panel"><div class="eyebrow">Já no jogo · 27 brawlers</div><div class="rows">${BUFFIES.map(t=>`<div class="mline"><b>${esc(t.trio)}</b><span>${t.b.map(esc).join(", ")} · ${t.data}</span></div>`).join("")}</div></div>
    </div>
    <h2>Por modo</h2><div class="grid2">${Object.keys(MODES).map(m=>`<div class="panel"><div class="mode-h">${micon(m)}<h3>${MODES[m].nome}</h3></div><div class="rows">${MODE_DATA[m].fortes.map(x=>row(x[0],"+"+fmt(x[1])+"%",1)).join("")}</div></div>`).join("")}</div>
-   <h2>Por mapa do ranked</h2><div class="panel">${Object.keys(MODES).map(m=>`<details class="mapref" ${m==="gem"?"open":""}><summary>${micon(m)}${MODES[m].nome}</summary>${MAPS.filter(x=>x.m===m).map(x=>`<div class="mline"><b>${esc(x.n)}</b><span>${x.t.length?x.t.map(t=>`${esc(t[0])} +${fmt(t[1])}`).join(" · "):"sem top próprio, use o modo"}</span></div>`).join("")}</details>`).join("")}</div>
-   <div class="src">Fontes: <a href="https://brawltime.ninja/tier-list/ranked" target="_blank" rel="noopener">Brawl Time Ninja · Ranked</a> e <a href="https://www.brawlplanet.com/tier-list" target="_blank" rel="noopener">Brawl Planet · Tier list</a>. "Vantagem" é quanto a taxa de vitória sobe em relação à média.</div></section>`;
+   <h2>Mapas da temporada</h2><div class="sub">Só os mapas da rotação atual da ranked, com a taxa de vitória de Diamante 1 pra cima. Atualizado em ${esc(mapsDate())}.</div><div class="panel">${Object.keys(MODES).map(m=>`<details class="mapref" ${m==="gem"?"open":""}><summary>${micon(m)}${MODES[m].nome}</summary>${MAPS.filter(x=>x.m===m).map(x=>`<div class="mline"><b>${esc(x.n)}</b><span>${x.t.length?x.t.slice(0,4).map(t=>`${esc(t[0])} ${fmt(t[2])}%`).join(" · "):"sem dados ainda, usa o modo"}</span></div>`).join("")}</details>`).join("")}</div>
+   <div class="src">Fontes: <a href="https://www.brawlplanet.com/pt-br/powerleague" target="_blank" rel="noopener">Brawl Planet · Ranqueada</a> (mapas), <a href="https://brawltime.ninja/tier-list/ranked" target="_blank" rel="noopener">Brawl Time Ninja · Ranked</a> (modos) e <a href="https://www.brawlplanet.com/tier-list" target="_blank" rel="noopener">Brawl Planet · Tier list</a>. "Vantagem" é quanto a taxa de vitória sobe em relação à média.</div></section>`;
   return h;
 }
 
@@ -551,7 +561,7 @@ function upgradeList(){
   const own=owned(); const res=[];
   for(const n of ALL){
     let s=0, maps=0, modes=[];
-    for(const mp of MAPS){ const v=modeVal(mp.t,n); if(v){ s+=v; maps++; } }
+    for(const mp of MAPS){ const v=modeVal(mp.t.slice(0,3),n); if(v){ s+=v; maps++; } }
     for(const m of Object.keys(MODES)){ const v=Math.max(modeVal(MODE_DATA[m].fortes,n),modeVal(MODE_DATA[m].faceis,n)*0.9); if(v){ s+=v*0.7; modes.push(MODES[m].nome);} }
     s+=Math.max(modeVal(RANKED.fortes,n),modeVal(RANKED.faceis,n))*0.8;
     if(TIER.S.some(x=>x[0]===n)) s+=3; else if(TIER.A.includes(n)) s+=1.5;
@@ -595,11 +605,11 @@ function viewTips(){
    </div>
    <div class="panel"><div class="eyebrow">O que cada modo pede</div><div class="tscroll"><table><thead><tr><th>Modo</th><th>Como vence</th><th>Erro comum</th></tr></thead><tbody>
      <tr><td>Pique-Gema</td><td>Segurar 10 gemas por 15 s; 1 carregador e 2 nas linhas</td><td>Carregador andando no meio com 8+ gemas</td></tr>
-     <tr><td>Futebrawl</td><td>2 gols; 1 atacante, 1 defensor, 1 que ganha a linha</td><td>Os três correndo atrás da bola</td></tr>
+     <tr><td>Fute-Brawl</td><td>2 gols; 1 atacante, 1 defensor, 1 que ganha a linha</td><td>Os três correndo atrás da bola</td></tr>
      <tr><td>Nocaute</td><td>2 de 3 rounds; dois de alcance e um flex</td><td>Entrar agressivo e virar 2 contra 3</td></tr>
      <tr><td>Zona Estratégica</td><td>Encher a zona primeiro; 2 de controle de área</td><td>Brigar fora da zona com 80%+</td></tr>
      <tr><td>Roubo</td><td>Quebrar o cofre ou ganhar no dano</td><td>Todo mundo defendendo e ninguém no cofre</td></tr>
-     <tr><td>Caça-Estelar</td><td>Ter mais estrelas no fim; alcance e sobrevivência</td><td>Trocar 1 por 1 quando já está na frente</td></tr>
+     <tr><td>Caça-Estrelas</td><td>Ter mais estrelas no fim; alcance e sobrevivência</td><td>Trocar 1 por 1 quando já está na frente</td></tr>
    </tbody></table></div></div>
    <div class="panel stack" style="gap:8px"><div class="eyebrow">Mudanças recentes da ranked</div>
      <div class="rows">${["Só entram brawlers no nível 11, em todas as ligas","Diamante pede 12 brawlers no nível 11 (antes eram 9)","Brawlers grátis no máximo por temporada subiram de 3 pra 6","A ranked agora desbloqueia com 5.000 troféus; quem já tinha acesso continua","Do Mestre I pra cima não pode fazer time","O reset de temporada derruba 2 ligas em vez de 6","Vitória 2-0 dá mais pontos; derrota 1-2 tira menos","A tela de pick e ban ganhou sugestão de ban, troca de ordem, filtros e chat rápido","Cada vitória na ranked dá 60 de XP do Pro Pass, até 1.200 por semana"].map(x=>`<div class="row" style="padding:7px 0"><span class="nm" style="font-weight:500">${x}</span></div>`).join("")}</div>
@@ -723,6 +733,23 @@ function setSync(s){ state.sync=s; const el=document.getElementById("saved"); if
     else if(state.profile.owned.length||state.profile.nick){ render(); flush(); }
     else { setSync("cloud"); render(); }
   }catch(e){ setSync("local"); }
+})();
+
+/* ======================= MAPAS ATUALIZADOS ======================= */
+/* No site do GitHub, o bot atualiza data/mapas.json todo dia; aqui o site lê esse arquivo.
+   Se não achar (como dentro do Claude), usa os mapas que já vêm no código. */
+function mapsDate(){ const d=new Date(MAPS_INFO.atualizado); return isNaN(d)?MAPS_INFO.atualizado:d.toLocaleDateString("pt-BR",{day:"numeric",month:"short",year:"numeric"}); }
+function fromJson(j){ return j.mapas.filter(m=>MODES[m.modo]).map(m=>({m:m.modo,n:m.nome,slug:m.slug,t:(m.top||[]).filter(x=>CLS[x[0]]).map(x=>[x[0],Math.round((x[1]-50)*10)/10,x[1]])})); }
+(async()=>{
+  try{
+    const r=await fetch("data/mapas.json",{cache:"no-store"}); if(!r.ok) return;
+    const j=await r.json(); if(!j||!Array.isArray(j.mapas)||j.mapas.length<18) return;
+    const cur = state.draft.map!==null ? MAPS[state.draft.map].slug : null;
+    MAPS.splice(0,MAPS.length,...fromJson(j));
+    MAPS_INFO.atualizado=j.atualizado||MAPS_INFO.atualizado;
+    if(cur){ const i=MAPS.findIndex(x=>x.slug===cur); state.draft.map = i>=0?i:null; if(i<0){state.draft.fp=null;state.draft.pos=null;state.draft.picks={};} }
+    render();
+  }catch(e){}
 })();
 
 render();
