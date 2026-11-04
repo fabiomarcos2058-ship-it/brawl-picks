@@ -1,6 +1,6 @@
 // Brawl Picks: deixa o site abrir rápido e funcionar mesmo com internet fraca.
 // Sempre tenta a versão nova primeiro; se não tiver internet, usa a última salva.
-const CACHE = "brawl-picks-v2";
+const CACHE = "brawl-picks-v3";
 const BASICO = ["./", "index.html", "manifest.webmanifest", "data/mapas.json",
   "icons/icon-192.png", "icons/icon-512.png", "icons/favicon.png"];
 

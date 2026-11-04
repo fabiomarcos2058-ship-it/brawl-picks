@@ -266,6 +266,28 @@ th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute
 .fbar{height:10px;border-radius:99px;background:var(--enemy);overflow:hidden}
 .fbar span{display:block;height:100%;background:var(--ally);transition:width .5s ease}
 .pickacts{display:flex;gap:12px;align-items:center;margin-top:8px;flex-wrap:wrap}
+
+/* fichas estilo carta */
+.tile.card{position:relative;overflow:hidden;color:var(--ink);border:2px solid var(--c);
+  background:linear-gradient(155deg,color-mix(in oklab,var(--c) 58%,var(--surface)),color-mix(in oklab,var(--c) 20%,var(--surface)))}
+.tile .tic{position:absolute;right:-14%;bottom:-14%;width:72%;height:72%;color:var(--c);opacity:.5}
+.tile b{position:relative;font-weight:400;text-shadow:0 1px 0 color-mix(in oklab,var(--surface) 70%,transparent)}
+.fic{width:14px;height:14px;vertical-align:-2px;margin-right:5px;color:var(--c)}
+.fchip.on .fic{color:currentColor}
+.flipbox{display:block;perspective:500px}
+.lock{position:absolute;top:6px;right:6px;display:inline-flex;gap:3px;align-items:center;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:var(--gold);color:var(--on-gold);padding:2px 6px 2px 5px;border-radius:99px}
+/* balão de melhor pick */
+.bestpick{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"t t t" "i m n" "b b b";gap:8px 12px;align-items:center;padding:14px;border-radius:18px;border:3px solid var(--gold);margin-bottom:6px;
+  background:linear-gradient(135deg,color-mix(in oklab,var(--gold) 24%,var(--surface)),var(--surface) 75%)}
+.bptag{grid-area:t;justify-self:start;font-family:var(--display);font-size:13px;letter-spacing:.05em;background:var(--gold);color:var(--on-gold);padding:3px 10px;border-radius:8px;transform:rotate(-3deg);box-shadow:0 2px 0 var(--gold-ink)}
+.bestpick>.tile{grid-area:i}
+.bpmid{grid-area:m;min-width:0}
+.bpname{font-family:var(--display);font-size:24px;line-height:1.05;overflow-wrap:anywhere}
+.bpnum{grid-area:n;text-align:right}
+.bpnum small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.bpnum b{font-family:var(--display);font-weight:400;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.bpgo{grid-area:b;width:100%}
+.bparrow{position:absolute;left:24%;bottom:-14px;width:22px;height:22px;background:var(--surface);border-right:3px solid var(--gold);border-bottom:3px solid var(--gold);transform:rotate(45deg)}
 /* rank */
 .rcard{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;background:color-mix(in oklab,var(--rc) 14%,var(--surface));border:1px solid color-mix(in oklab,var(--rc) 45%,var(--line))}
 .rname{font-family:var(--display);font-size:20px;line-height:1.1}
@@ -284,7 +306,14 @@ select{width:100%;font:inherit;padding:11px 12px;border-radius:12px;border:1px s
   .vs.enter{animation:vsin .6s .25s cubic-bezier(.2,1.4,.4,1) both}
   @keyframes vsin{from{transform:scale(.3) rotate(-40deg)}to{transform:rotate(-8deg)}}
   .bslot.pop{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
-  .bslot.pop .tile{animation:flash .7s ease-out}
+  .bslot.pop .tile{animation:flip .6s cubic-bezier(.2,.9,.3,1.15),flash .9s ease-out}
+  @keyframes flip{0%{transform:rotateY(100deg) scale(.9)}100%{transform:none}}
+  .bslot.pop .lock{animation:stamp .5s .3s cubic-bezier(.2,1.6,.4,1) both}
+  @keyframes stamp{from{transform:scale(2.3) rotate(-14deg)}to{transform:none}}
+  .bestpick.enter{animation:bpin .6s cubic-bezier(.2,1.4,.4,1) both}
+  @keyframes bpin{from{transform:translateY(-14px) scale(.94)}to{transform:none}}
+  .bptag{animation:wig 2.6s ease-in-out infinite}
+  @keyframes wig{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(2deg)}}
   @keyframes pop{0%{transform:scale(.86)}60%{transform:scale(1.07)}100%{transform:scale(1)}}
   @keyframes flash{0%{box-shadow:0 0 0 0 var(--gold)}50%{box-shadow:0 0 0 9px color-mix(in oklab,var(--gold) 35%,transparent)}100%{box-shadow:0 0 0 0 transparent}}
   .bslot.turn:not(.filled):not(.enter){animation:pulse 1.4s ease-in-out infinite}
@@ -554,8 +583,18 @@ const ICON = {
   hist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>',
   user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>'
 };
+const CICON = {
+  Tanque:'<path d="M12 2.2l8 3v6.2c0 5.1-3.4 9.3-8 10.9-4.6-1.6-8-5.8-8-10.9V5.2z"/>',
+  Atirador:'<g fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="7"/><path d="M12 1.5v6M12 16.5v6M1.5 12h6M16.5 12h6"/></g><circle cx="12" cy="12" r="2"/>',
+  Assassino:'<path d="M20.5 2.3l1.2 1.2-9.9 11.6-2.9-2.9z"/><path d="M6.2 12.6l5.2 5.2-1.6 1.6-1.4-1.4-3.6 3.6-2.4-2.4 3.6-3.6-1.4-1.4z"/>',
+  Artilharia:'<circle cx="10.5" cy="14" r="7.5"/><path d="M14.6 6.2l2-2 2.8 2.8-2 2z"/><path d="M19.4 1.6l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/>',
+  Dano:'<path d="M12 1.8l2.5 6.3 6.7-1.2-4.3 5.1 4.3 5.1-6.7-1.2L12 22.2l-2.5-6.3-6.7 1.2 4.3-5.1-4.3-5.1 6.7 1.2z"/>',
+  Controlador:'<path d="M12 2.5a9.5 9.5 0 1 1-9.5 9.5h3.2A6.3 6.3 0 1 0 12 5.7z"/><path d="M12 8.6a3.4 3.4 0 1 1-3.4 3.4H12z"/>',
+  Suporte:'<path d="M9 2.5h6v6.5h6.5v6H15v6.5H9V15H2.5V9H9z"/>'
+};
+const LOCK='<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M7 10V7a5 5 0 0 1 10 0v3h1.5v11h-13V10zm2.5 0h5V7a2.5 2.5 0 0 0-5 0z"/></svg>';
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const tile = (n,cls="") => `<span class="tile ${cls} k-${CLS[n]}" aria-hidden="true">${esc(abbr(n))}</span>`;
+const tile = (n,cls="") => `<span class="tile card ${cls} k-${CLS[n]}" aria-hidden="true"><svg class="tic" viewBox="0 0 24 24" fill="currentColor">${CICON[CLS[n]]}</svg><b>${esc(abbr(n))}</b></span>`;
 const micon = m => `<span class="micon" style="background:var(${MODES[m].cor})">${ICON[m]}</span>`;
 
 /* ======================= RENDER ======================= */
@@ -622,8 +661,9 @@ function viewBoard(){
     const lab = isMe?"Você":t==="a"?(friends[fi++]?.nick||"Aliado"):"Inimigo";
     return `<button class="bslot ${t} ${n?"filled":""} ${isMe?"me":""} ${cur?"turn":""} ${state.justPicked===sl?"pop":""} ${enter?"enter":""}" style="--i:${i}" data-act="slot" data-v="${sl}" aria-label="${esc(lab)}, ${idx}º pick${n?", "+esc(n):""}">
       <span class="ordn">${idx}º</span>
-      ${n?tile(n,"xl"):`<span class="tile xl empty">${isMe&&sug?esc(abbr(sug)):"?"}</span>`}
-      <span class="bsl">${esc(lab)}${cur&&!n?' <em>escolhendo</em>':""}</span>
+      ${isMe&&n?`<span class="lock">${LOCK}Travado</span>`:""}
+      <span class="flipbox">${n?tile(n,"xl"):`<span class="tile xl empty">?</span>`}</span>
+      <span class="bsl">${esc(lab)}${cur&&!n?' <em>· na vez</em>':""}</span>
       <span class="bsn">${n?esc(n):isMe&&sug?`Sugestão: ${esc(sug)}`:"Toque pra escolher"}</span></button>`;
   };
   const meus=[1,2,3].map(k=>myL+k), deles=[1,2,3].map(k=>enL+k);
@@ -638,7 +678,17 @@ function viewBoard(){
       <div class="src" style="text-align:center">Média da taxa de vitória dos picks neste mapa (ranqueada, Diamante 1 pra cima). Não é previsão de resultado.</div>`;
   }
   const feitos=ORDER.filter(s=>d.picks[s]).length;
-  return `<section class="board" aria-label="Draft">
+  let best="";
+  if(!d.picks[me] && sug){
+    const wr=mapWR(sug);
+    best=`<div class="bestpick ${enter?"enter":""}"><span class="bptag">Melhor pick</span>
+      ${tile(sug,"xl")}
+      <div class="bpmid"><div class="bpname">${esc(sug)}</div><div class="sub">${CLASS_LABEL[CLS[sug]]}${r.top[0].own?" · upado":""}</div></div>
+      <div class="bpnum">${wr!=null?`<small>Vitória no mapa</small><b>${fmt(wr.toFixed(1))}%</b>`:`<small>Sem dado do mapa</small><b>—</b>`}</div>
+      <button class="btn gold small bpgo" data-act="choose" data-v="${esc(sug)}">Escolher</button>
+      <span class="bparrow" aria-hidden="true"></span></div>`;
+  }
+  return `${best}<section class="board" aria-label="Draft">
     <div class="bhead"><span class="eyebrow">${feitos===6?"Times completos":`Pick ${Math.min(6,feitos+1)} de 6`}</span>${feitos?`<button class="x" data-act="clearboard">Limpar picks</button>`:""}</div>
     <div class="bgrid2">
       <div class="side a"><div class="sideh">Seu time</div>${meus.map(card).join("")}</div>
@@ -820,7 +870,7 @@ function viewAccount(){
    <div class="panel stack">
      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap"><div><h3>Brawlers no nível 11</h3><div class="sub">Marque todos que você tem upados. Só esses entram na ranked.</div></div><div><span class="count">${own.size}</span><span class="muted"> / ${ALL.length}</span></div></div>
      <input type="search" id="accq" placeholder="Buscar brawler" value="${esc(state.accQuery)}" autocomplete="off">
-     <div class="filters">${["Todos",...Object.keys(CLASSES)].map(c=>`<button class="fchip ${f===c?"on":""}" data-act="accf" data-v="${c}">${c==="Todos"?"Todos":CLASS_LABEL[c]}</button>`).join("")}</div>
+     <div class="filters">${["Todos",...Object.keys(CLASSES)].map(c=>`<button class="fchip ${f===c?"on":""}" data-act="accf" data-v="${c}">${c==="Todos"?"Todos":`<svg class="fic k-${c}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${CICON[c]}</svg>`+CLASS_LABEL[c]}</button>`).join("")}</div>
      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" data-act="selall">Marcar estes ${list.length}</button><button class="btn small" data-act="selnone">Desmarcar estes</button></div>
      <div class="bgrid" id="accgrid">${list.map(n=>`<button class="bcell ${own.has(n)?"on":""}" data-act="own" data-v="${esc(n)}" aria-pressed="${own.has(n)}">${tile(n)}<span>${esc(n)}</span></button>`).join("")||'<div class="sub">Nenhum brawler com esse nome.</div>'}</div>
    </div>
@@ -932,7 +982,7 @@ function drawSheet(keepFocus){
     <div class="sheet-h"><h3 style="color:var(${isPlayed?"--ink":t==="a"?"--ally":"--enemy"})">${isPlayed?"Qual brawler você jogou?":(t==="a"?"Pick do aliado":"Pick do inimigo")+" · "+(ORDER.indexOf(sheetSlot)+1)+"º"}</h3>
     <div style="display:flex;gap:6px">${!isPlayed&&d.picks[sheetSlot]?'<button class="btn small" data-act="clearslot">Limpar</button>':""}<button class="btn small" data-act="close">Fechar</button></div></div>
     <input type="search" id="sq" placeholder="Digite o nome" autocomplete="off">
-    <div class="filters" id="sfil">${["Todos",...Object.keys(CLASSES)].map(c=>`<button class="fchip ${sheetF===c?"on":""}" data-act="sf" data-v="${c}">${c==="Todos"?"Todos":CLASS_LABEL[c]}</button>`).join("")}</div>
+    <div class="filters" id="sfil">${["Todos",...Object.keys(CLASSES)].map(c=>`<button class="fchip ${sheetF===c?"on":""}" data-act="sf" data-v="${c}">${c==="Todos"?"Todos":`<svg class="fic k-${c}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${CICON[c]}</svg>`+CLASS_LABEL[c]}</button>`).join("")}</div>
     ${!isPlayed&&sheetSlot===mySlot()?(()=>{const tp=recommend().top;return tp.length?`<div class="eyebrow">Melhores pra você agora</div><div class="friends">${tp.map(x=>`<button class="fr bufb" data-act="pickb" data-v="${esc(x.n)}">${tile(x.n)}${esc(x.n)}</button>`).join("")}</div>`:"";})():""}
     <div class="sheet-body" id="sbody">${grid}</div></div></div>`;
 }
