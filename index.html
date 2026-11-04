@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Draft Ranked</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Rubik:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: app de uma coluna, pensado pro celular; barra de abas fixa embaixo; draft em etapas que vão abrindo. */
+:root{
+  --bg:#eaf0f8; --surface:#ffffff; --surface2:#dfe7f2; --ink:#0e1a31; --muted:#56637c; --line:#c9d4e4;
+  --gold:#f5b800; --gold-ink:#7b5900; --on-gold:#1a1300;
+  --ally:#1d74d8; --enemy:#d9392f; --good:#16915a;
+  --c-dano:#e4572e; --c-tanque:#2e86de; --c-atirador:#8a5cf6; --c-artilharia:#c98a00; --c-assassino:#d6336c; --c-controlador:#0f9d8a; --c-suporte:#4caf50;
+  --m-gem:#8b5cf6; --m-ball:#2f80ed; --m-heist:#d97706; --m-bounty:#0ea5a4; --m-zone:#e0457b; --m-ko:#ea580c;
+  --display:"Lilita One","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  --body:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0a1222; --surface:#121e36; --surface2:#1a2846; --ink:#edf2fb; --muted:#94a2bd; --line:#283a5d;
+  --gold:#ffc61a; --gold-ink:#ffd54f; --on-gold:#1a1300;
+  --ally:#4d9cff; --enemy:#ff6b5f; --good:#3ccf89; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0a1222; --surface:#121e36; --surface2:#1a2846; --ink:#edf2fb; --muted:#94a2bd; --line:#283a5d;
+  --gold:#ffc61a; --gold-ink:#ffd54f; --on-gold:#1a1300;
+  --ally:#4d9cff; --enemy:#ff6b5f; --good:#3ccf89; color-scheme:dark }
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px calc(96px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:400;letter-spacing:.01em;text-wrap:balance;margin:0}
+h1{font-size:30px;line-height:1.05}
+h2{font-size:22px}
+h3{font-size:17px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:10px}
+.badge{width:40px;height:40px;border-radius:12px;background:var(--gold);color:var(--on-gold);display:grid;place-items:center;font-family:var(--display);font-size:20px;transform:rotate(-6deg);box-shadow:0 3px 0 var(--gold-ink)}
+.sub{color:var(--muted);font-size:13px}
+.hello{font-size:13px;color:var(--muted);text-align:right}
+.hello b{color:var(--ink)}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;color:var(--muted)}
+.muted{color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.step{display:flex;flex-direction:column;gap:12px}
+.step-h{display:flex;align-items:center;gap:10px}
+.num{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);font-family:var(--display);display:grid;place-items:center;font-size:14px;flex:none}
+.done .num{background:var(--good);color:#fff}
+.edit{margin-left:auto;background:none;border:0;color:var(--gold-ink);font-weight:600;font-size:13px;padding:4px}
+.chosen{font-weight:600}
+.notice{background:color-mix(in oklab,var(--gold) 18%,var(--surface));border:1px solid color-mix(in oklab,var(--gold) 55%,var(--line));border-radius:12px;padding:12px 14px;font-size:14px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.btn{border:0;border-radius:12px;padding:11px 16px;font-weight:700;background:var(--surface2);border:1px solid var(--line)}
+.btn.gold{background:var(--gold);color:var(--on-gold);border-color:var(--gold);box-shadow:0 3px 0 var(--gold-ink)}
+.btn.gold:active{transform:translateY(2px);box-shadow:0 1px 0 var(--gold-ink)}
+.btn.small{padding:7px 12px;font-size:13px}
+
+/* mapas */
+.modes{display:flex;flex-direction:column;gap:12px}
+.mode-h{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.micon{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;color:#fff;flex:none}
+.micon svg{width:14px;height:14px}
+.maps{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.map{text-align:left;background:var(--surface2);border:2px solid transparent;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.map b{font-weight:600;font-size:14px}
+.map span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.map.on{border-color:var(--gold);background:color-mix(in oklab,var(--gold) 16%,var(--surface))}
+
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choice.three{grid-template-columns:repeat(3,1fr)}
+.opt{background:var(--surface2);border:2px solid transparent;border-radius:14px;padding:14px 10px;text-align:center;display:flex;flex-direction:column;gap:4px;align-items:center}
+.opt big{font-family:var(--display);font-size:20px;line-height:1}
+.opt small{font-size:12px;color:var(--muted);line-height:1.3}
+.opt.on{border-color:var(--gold);background:color-mix(in oklab,var(--gold) 16%,var(--surface))}
+.opt.ally big{color:var(--ally)}.opt.enemy big{color:var(--enemy)}
+
+/* ordem de picks */
+.order{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.ord{flex:1 0 46px;border-radius:10px;padding:6px 4px;text-align:center;font-size:11px;font-weight:700;border:2px solid transparent;color:#fff}
+.ord.a{background:var(--ally)}.ord.e{background:var(--enemy)}
+.ord.me{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.ord.past{opacity:.95}.ord.fut{opacity:.35}
+.ord i{display:block;font-style:normal;font-family:var(--display);font-size:15px;font-weight:400}
+
+/* slots */
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.slot{border-radius:12px;border:2px dashed var(--line);background:var(--surface2);padding:10px;display:flex;align-items:center;gap:10px;text-align:left;min-width:0}
+.slot.filled{border-style:solid}
+.slot.e.filled{border-color:var(--enemy)}.slot.a.filled{border-color:var(--ally)}
+.slot .who{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.slot.e .who{color:var(--enemy)}.slot.a .who{color:var(--ally)}
+.slot .nm{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot>div{min-width:0}
+
+/* fichas de brawler */
+.tile{--c:var(--muted);width:40px;height:40px;border-radius:11px;flex:none;display:grid;place-items:center;font-family:var(--display);font-size:15px;color:var(--ink);background:color-mix(in oklab,var(--c) 26%,var(--surface));border:2px solid var(--c)}
+.tile.lg{width:52px;height:52px;font-size:19px;border-radius:14px}
+.k-Dano{--c:var(--c-dano)}.k-Tanque{--c:var(--c-tanque)}.k-Atirador{--c:var(--c-atirador)}.k-Artilharia{--c:var(--c-artilharia)}.k-Assassino{--c:var(--c-assassino)}.k-Controlador{--c:var(--c-controlador)}.k-Suporte{--c:var(--c-suporte)}
+
+/* resultados */
+.picks{display:flex;flex-direction:column;gap:10px}
+.pick{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.pick.first{border:2px solid var(--gold);background:color-mix(in oklab,var(--gold) 10%,var(--surface))}
+.pick .rank{font-family:var(--display);font-size:13px;color:var(--muted)}
+.pick .name{font-family:var(--display);font-size:20px;line-height:1.1}
+.pick .cls{font-size:12px;color:var(--muted)}
+.pick>div{min-width:0}
+.why{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.chip{font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 8px;background:var(--surface2);color:var(--ink);white-space:nowrap}
+.chip.g{background:color-mix(in oklab,var(--good) 18%,var(--surface));color:var(--good)}
+.chip.r{background:color-mix(in oklab,var(--enemy) 16%,var(--surface));color:var(--enemy)}
+.chip.y{background:color-mix(in oklab,var(--gold) 26%,var(--surface));color:var(--gold-ink)}
+.score{text-align:right;font-variant-numeric:tabular-nums}
+.score b{font-family:var(--display);font-size:22px;font-weight:400;display:block;line-height:1}
+.score small{font-size:10.5px;color:var(--muted)}
+.x{background:none;border:0;color:var(--muted);font-size:12px;text-decoration:underline;padding:4px 0 0}
+.toggle{display:flex;align-items:center;gap:10px;font-size:14px}
+.sw{width:44px;height:26px;border-radius:99px;background:var(--line);border:0;position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--surface);transition:transform .15s}
+.sw[aria-checked="true"]{background:var(--good)}
+.sw[aria-checked="true"]::after{transform:translateX(18px)}
+.friends{display:flex;flex-wrap:wrap;gap:8px}
+.fr{display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:12px;padding:6px 10px 6px 6px;font-weight:600;font-size:14px}
+.fr .tile{width:32px;height:32px;font-size:12px;border-radius:9px}
+.bufb{border:2px solid transparent}
+.bufb.on{border-color:var(--good);background:color-mix(in oklab,var(--good) 14%,var(--surface))}
+
+/* listas de dados */
+.rows{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .tile{width:32px;height:32px;font-size:12px;border-radius:9px}
+.row .nm{font-weight:600;flex:1;min-width:0}
+.row .val{font-variant-numeric:tabular-nums;font-weight:700}
+.val.pos{color:var(--good)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+details.mapref{border-top:1px solid var(--line);padding:10px 0}
+details.mapref summary{cursor:pointer;font-weight:600;display:flex;align-items:center;gap:8px;list-style:none}
+details.mapref summary::-webkit-details-marker{display:none}
+.mline{display:flex;justify-content:space-between;gap:10px;padding:6px 0;font-size:14px;border-bottom:1px dashed var(--line)}
+.mline:last-child{border-bottom:0}
+.mline b{font-weight:600}
+.mline span{color:var(--muted);text-align:right}
+.src{font-size:12px;color:var(--muted)}
+.src a{color:var(--gold-ink)}
+
+/* conta */
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:600}
+input[type=text],input[type=search]{width:100%;font:inherit;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:var(--ink)}
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.fchip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 11px;font-size:13px;font-weight:600;white-space:nowrap}
+.fchip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.bcell{background:var(--surface2);border:2px solid transparent;border-radius:12px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px;font-weight:600;text-align:center;position:relative;min-width:0}
+.bcell span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bcell.on{border-color:var(--good);background:color-mix(in oklab,var(--good) 14%,var(--surface))}
+.bcell.on::after{content:"✓";position:absolute;top:4px;right:6px;color:var(--good);font-weight:800}
+.bcell[disabled]{opacity:.3;cursor:not-allowed}
+.count{font-family:var(--display);font-size:26px}
+.saved{font-size:12px;color:var(--muted)}
+
+/* dicas */
+.tip{display:flex;gap:12px}
+.tip .ic{width:34px;height:34px;border-radius:10px;background:var(--surface2);display:grid;place-items:center;font-family:var(--display);flex:none;color:var(--gold-ink)}
+.tip p{margin:2px 0 0;color:var(--muted);font-size:14px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.tscroll{overflow-x:auto}
+.ladder{display:flex;flex-wrap:wrap;gap:6px}
+.ladder span{font-size:12px;font-weight:700;padding:5px 9px;border-radius:8px;background:var(--surface2)}
+.ladder span.hl{background:var(--gold);color:var(--on-gold)}
+
+/* abas */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+.tabs nav{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tab{background:none;border:0;padding:9px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:600;color:var(--muted)}
+.tab svg{width:22px;height:22px}
+.tab[aria-current="page"]{color:var(--ink)}
+.tab[aria-current="page"] svg{color:var(--gold-ink)}
+
+/* seletor */
+.sheet{position:fixed;inset:0;z-index:30;background:color-mix(in oklab,#000 55%,transparent);display:flex;align-items:flex-end;justify-content:center}
+.sheet-in{background:var(--surface);width:100%;max-width:720px;max-height:86vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));gap:10px}
+.sheet-body{overflow-y:auto;min-height:0}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+@media (prefers-reduced-motion:no-preference){
+  .pick{animation:rise .28s ease both}
+  .pick:nth-child(2){animation-delay:.04s}.pick:nth-child(3){animation-delay:.08s}.pick:nth-child(4){animation-delay:.12s}.pick:nth-child(5){animation-delay:.16s}
+  @keyframes rise{from{transform:translateY(6px)}to{transform:none}}
+}
+@media (max-width:420px){ h1{font-size:26px} .choice.three .opt small{font-size:11px} }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="badge" aria-hidden="true">D</div>
+      <div><h1>Draft Ranked</h1><div class="sub">Picks pelos dados da temporada · nov 2026</div></div>
+    </div>
+    <div class="hello" id="hello"></div>
+  </header>
+  <main id="app" class="stack"></main>
+</div>
+
+<div class="tabs"><nav id="tabs" aria-label="Seções"></nav></div>
+<div id="sheet" hidden></div>
+
+<script>
+/* ======================= DADOS ======================= */
+const CLASSES = {
+  Dano:["8-Bit","Carl","Chester","Chuck","Clancy","Colette","Colt","Eve","Lola","Lumi","Mina","Moe","Najia","Nita","Pearl","R-T","Rico","Shelly","Spike","Surge","Tara","Vince"],
+  Tanque:["Ash","Bibi","Bolt","Bull","Buster","Damian","Darryl","Draco","El Primo","Frank","Hank","Jacky","Meg","Ollie","Rosa","Trunk"],
+  Atirador:["Angelo","Bea","Belle","Bonnie","Brock","Janet","Maisie","Mandy","Nani","Pierce","Piper"],
+  Artilharia:["Barley","Dynamike","Grom","Juju","Larry & Lawrie","Penny","Sprout","Tick"],
+  Assassino:["Alli","Buzz","Cordelius","Crow","Edgar","Fang","Gigi","Kaze","Kenji","Leon","Lily","Melodie","Mico","Mortis","Nori","Sam","Shade","Starr Nova","Stu"],
+  Controlador:["Amber","Bo","Charlie","Cosmo","Emz","Finx","Gale","Gene","Griff","Jessie","Lou","Meeple","Mr. P","Otis","Sandy","Sirius","Squeak","Willow","Ziggy"],
+  Suporte:["Berry","Byron","Doug","Glowy","Gray","Gus","Jae-Yong","Kit","Max","Pam","Poco","Ruffs","Wendy"]
+};
+const CLASS_LABEL = {Dano:"Causador de dano",Tanque:"Tanque",Atirador:"Atirador",Artilharia:"Artilharia",Assassino:"Assassino",Controlador:"Controlador",Suporte:"Suporte"};
+const CLS = {}; const ALL = [];
+for (const [k,list] of Object.entries(CLASSES)) for (const n of list){ CLS[n]=k; ALL.push(n); }
+ALL.sort((a,b)=>a.localeCompare(b));
+const abbr = n => n.replace(/[^A-Za-z0-9 ]/g," ").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase().padEnd(2, n[1]?n[1].toUpperCase():"");
+
+const MODES = {
+  gem:{nome:"Pique-Gema",cor:"--m-gem"}, ball:{nome:"Futebrawl",cor:"--m-ball"}, zone:{nome:"Zona Estratégica",cor:"--m-zone"},
+  heist:{nome:"Roubo",cor:"--m-heist"}, bounty:{nome:"Caça-Estelar",cor:"--m-bounty"}, ko:{nome:"Nocaute",cor:"--m-ko"}
+};
+/* Top 3 de cada mapa do ranked: vantagem de vitória (Brawl Time Ninja, ranked, atualizado em 1 nov 2026) */
+const MAPS = [
+  {m:"gem",n:"Double Swoosh",t:[["Bolt",6.8],["Amber",5.3],["Clancy",5.0]]},
+  {m:"gem",n:"Gem Fort",t:[["Bolt",7.6],["Tara",6.6],["Clancy",6.1]]},
+  {m:"gem",n:"Hard Rock Mine",t:[["Bolt",7.1],["Ash",6.1],["Bo",5.3]]},
+  {m:"gem",n:"Undermine",t:[["Bo",6.4],["Bolt",6.1],["Tara",5.5]]},
+  {m:"ball",n:"Center Stage",t:[["Rosa",6.1],["Jacky",6.1],["Amber",6.0]]},
+  {m:"ball",n:"Pinball Dreams",t:[["Shade",7.0],["Amber",5.7],["Jacky",5.6]]},
+  {m:"ball",n:"Sneaky Fields",t:[["Jacky",6.3],["Amber",4.6],["Rosa",4.3]]},
+  {m:"ball",n:"Triple Dribble",t:[]},
+  {m:"zone",n:"Dueling Beetles",t:[["Amber",7.6],["Bo",6.8],["Rosa",6.0]]},
+  {m:"zone",n:"Open Business",t:[["Rosa",7.6],["Amber",7.0],["Jessie",6.4]]},
+  {m:"zone",n:"Parallel Plays",t:[["Juju",8.9],["Doug",6.1],["R-T",5.5]]},
+  {m:"zone",n:"Ring of Fire",t:[]},
+  {m:"heist",n:"Bridge Too Far",t:[["8-Bit",8.7],["Shade",7.3],["Wendy",6.3]]},
+  {m:"heist",n:"Hot Potato",t:[["Nita",8.9],["Bibi",7.9],["Edgar",7.2]]},
+  {m:"heist",n:"Kaboom Canyon",t:[["Nori",7.9],["Nita",7.5],["Bibi",7.2]]},
+  {m:"heist",n:"Safe Zone",t:[]},
+  {m:"bounty",n:"Dry Season",t:[["Bolt",7.6],["Bo",7.3],["Janet",7.2]]},
+  {m:"bounty",n:"Hideout",t:[["Bolt",7.4],["Bo",7.3],["Janet",5.6]]},
+  {m:"bounty",n:"Layer Cake",t:[["Bolt",7.0],["Bo",6.8],["Janet",6.8]]},
+  {m:"bounty",n:"Shooting Star",t:[]},
+  {m:"ko",n:"Belle's Rock",t:[["Grom",6.8],["Edgar",5.7],["Wendy",4.4]]},
+  {m:"ko",n:"Flaring Phoenix",t:[["Pearl",7.0],["Edgar",6.5],["Grom",6.1]]},
+  {m:"ko",n:"Flowing Springs",t:[["Wendy",6.9],["Grom",5.6],["Pearl",5.5]]},
+  {m:"ko",n:"Goldarm Gulch",t:[]},
+  {m:"ko",n:"New Horizons",t:[]},
+  {m:"ko",n:"Out in the Open",t:[]}
+];
+/* Por modo (Brawl Time Ninja, 1 nov 2026): "fortes" = vantagem com prática; "fáceis" = vantagem sem prática; "taxa" = top 11 por taxa de vitória da temporada */
+const MODE_DATA = {
+  gem:{fortes:[["Bolt",8.3],["Wendy",5.9],["Starr Nova",5.5],["Damian",4.2]],faceis:[["Bo",7.2],["Edgar",6.5],["Doug",5.9],["Nita",5.5]],
+       taxa:[["Bolt",65.4],["Eve",63.4],["Bo",63.2],["Tara",62.5],["Clancy",61.8],["Amber",61.5],["Wendy",61.4],["Rosa",61.2],["Shade",60.9],["Damian",60.7],["Jessie",60.7]]},
+  ball:{fortes:[["Damian",7.1],["Starr Nova",5.1],["Amber",5.1],["Jacky",5.0]],faceis:[["Jacky",4.6],["Doug",4.6],["Nita",4.0],["Damian",3.9]],
+       taxa:[["Amber",63.9],["Ash",62.1],["Jacky",61.7],["Shade",61.5],["Damian",61.0],["Doug",60.0],["Wendy",59.9],["Starr Nova",59.8],["Gus",59.8],["Nita",59.8],["Rosa",59.7]]},
+  zone:{fortes:[["Starr Nova",7.1],["Wendy",5.6],["Bolt",5.3],["Nori",4.8]],faceis:[["Edgar",5.5],["Doug",5.4],["Nita",4.6],["Frank",4.5]],
+       taxa:[["Juju",63.5],["Amber",62.1],["Rosa",61.8],["Trunk",61.8],["Bo",61.8],["Bibi",61.7],["Doug",61.7],["Clancy",60.8],["Jessie",60.7],["Hank",60.5],["Ash",60.5]]},
+  heist:{fortes:[["Nori",9.5],["Gigi",4.7],["Doug",4.6],["Nita",4.6]],faceis:[["Nita",6.0],["Bull",5.6],["Edgar",4.7],["Doug",4.6]],
+       taxa:[["Nori",63.3],["Nita",61.4],["Shade",61.3],["Bibi",60.5],["Jessie",60.4],["Bull",59.6],["Doug",59.5],["Edgar",58.8],["Mico",58.8],["8-Bit",58.4],["Melodie",58.2]]},
+  bounty:{fortes:[["Wendy",7.7],["Bolt",7.5],["Amber",5.1],["Pearl",5.1]],faceis:[["Jessie",5.1],["Doug",5.1],["Griff",4.9],["Bo",4.8]],
+       taxa:[["Vince",71.9],["Cosmo",71.7],["Pam",69.6],["Bolt",68.8],["Rosa",67.9],["Clancy",67.0],["Nita",66.7],["Janet",65.9],["Jacky",65.7],["Sandy",65.7],["Meg",65.3]]},
+  ko:{fortes:[["Wendy",7.2],["Frank",5.7],["Pearl",4.7],["Ash",4.6]],faceis:[["Edgar",3.9],["Pearl",3.8],["Buster",3.4],["Chester",3.1]],
+       taxa:[["Vince",79.6],["Cosmo",79.6],["Clancy",76.3],["Jacky",75.1],["Draco",75.0],["Rosa",74.4],["Bolt",73.5],["Ash",73.1],["Nita",73.0],["Trunk",72.9],["Pam",72.7]]}
+};
+/* Ranked geral (Brawl Time Ninja, 1 nov 2026, 4,4 mi de partidas) */
+const RANKED = {fortes:[["Jessie",5.7],["Juju",5.6],["Nita",5.5],["Doug",5.2]],faceis:[["Jessie",5.8],["Nita",5.4],["Doug",5.4],["Bo",5.4]]};
+/* Tier por taxa de vitória (Brawl Planet, 2 nov 2026, modos do ranked) */
+const TIER = {S:[["Vince",65.5],["Wendy",64.6],["Cosmo",60.6],["Amber",59.7],["Shade",59.1]],
+  A:["Bolt","Nori","Gus","Starr Nova","R-T","Gigi","Juju","Pierce","Lumi","Mina","Ash"],
+  B:["Bonnie","Surge","Sandy","Bea","Brock","Spike","Gale","Poco","Tick","Squeak","Berry","Rosa","Fang","Bull","Edgar","Piper"]};
+/* Balanceamento oficial de 3 nov 2026 (notas da Supercell). Ainda não há taxa de vitória pós-patch,
+   então: nerf forte (mexeu em ataque, vida, Super ou trait base) multiplica a pontuação por 0,5;
+   nerf leve (só gadget, buffie, hypercharge ou um número pequeno) por 0,8; buff soma 0,8. */
+const PATCH = {
+  data:"3 nov",
+  forte:{Gus:"Máx. de espíritos 10→3, cura e gadget menores",Shade:"Vida 3700→3400, Super dura 4 s",Amber:"Super e gadgets mais fracos",Wendy:"Projétil 20% menor",Max:"Carrega Super mais devagar",Ash:"Super carrega 15% mais devagar",Maisie:"Ataque 1500→1360"},
+  leve:{Pierce:"Último tiro 1500→1400",Nori:"Super por peixe 4%→3%",Colette:"Hypercharge carrega menos",Brock:"Hypercharge e buffie mais fracos",Rico:"Gadget e buffie mais fracos"},
+  buff:{Hank:"Vida 5500→6000",Shelly:"Ataque e Super mais fortes",Ziggy:"Ataque 950→1050",Draco:"Super 1120→1620",Chuck:"Recarga mais rápida",Darryl:"Super mais forte",Melodie:"Ataque mais forte",Buster:"Carrega Super mais perto do time",Angelo:"Carrega o tiro 10% mais rápido","R-T":"Projétil 15% maior"},
+  misto:{Cosmo:"Mais vida, armadilha menor",Damian:"Soco mais forte, pulo mais lento",Surge:"Hypercharge mudou",Squeak:"Mais dano, star power menor",Kit:"Super cai mais rápido"}
+};
+const patchOf = n => PATCH.forte[n]?["forte",PATCH.forte[n]] : PATCH.leve[n]?["leve",PATCH.leve[n]] : PATCH.buff[n]?["buff",PATCH.buff[n]] : PATCH.misto[n]?["misto",PATCH.misto[n]] : null;
+function patchAdjust(n,s,why){
+  const p=patchOf(n); if(!p) return s;
+  if(p[0]==="forte"){ why.unshift(["r",`Nerfado em ${PATCH.data}`]); return s*0.5; }
+  if(p[0]==="leve"){ why.unshift(["r",`Nerf leve em ${PATCH.data}`]); return s*0.8; }
+  if(p[0]==="buff"){ why.unshift(["g",`Buffado em ${PATCH.data}`]); return s+0.8; }
+  why.push(["",`Mudou em ${PATCH.data}`]); return s;
+}
+const nerfed = n => !!(PATCH.forte[n]||PATCH.leve[n]);
+
+/* Buffies: cada brawler ganha Buffie de Star Power, de Gadget e Hyper Buffie (BrawlMetrics; Brawl Talk de 31 out 2026) */
+const BUFFIES = [
+  {trio:"Mortis' Mortuary",data:"dez 2025",b:["Emz","Frank","Mortis"]},
+  {trio:"Ranger Ranch",data:"dez 2025",b:["Colt","Shelly","Spike"]},
+  {trio:"Bull's Diner",data:"fev 2026",b:["Bibi","Bull","Crow"]},
+  {trio:"Rumble Jungle",data:"fev 2026",b:["Bo","Leon","Nita"]},
+  {trio:"Gift Shop",data:"abr 2026",b:["Colette","Edgar","Griff"]},
+  {trio:"Starrcade",data:"jun 2026",b:["8-Bit","Brock","Rico"]},
+  {trio:"Super City",data:"jun 2026",b:["Max","Meg","Surge"]},
+  {trio:"Ghost Station",data:"set 2026",b:["Chuck","Gus","Shade"]},
+  {trio:"Poco's Bandstand",data:"set 2026",b:["Amber","El Primo","Poco"]}
+];
+const BUFFIES_NEW = [
+  {trio:"Snowtel",b:[["Mr. P","O sino dá escudo pra ele e pro carregador, e chegam carregadores extras"],["Lou","Dá pra cancelar o bloco de gelo antes e ele deixa uma área que congela"],["Gale","Parede de vento que desvia tiros e tornado que acelera aliados"]]},
+  {trio:"Candyland",b:[["Mandy","Lentidão mais forte de perto e o Hyper mantém o alcance longo sem precisar focar"],["Chester","A caixa surpresa vem com uma caixa falsa e o Hyper joga o dobro de sinos"],["Berry","Poça que cura aliados e ataque que se divide no Hyper"]]}
+];
+const HAS_BUFFIE = new Set(BUFFIES.flatMap(t=>t.b));
+const SOON_BUFFIE = new Set(BUFFIES_NEW.flatMap(t=>t.b.map(x=>x[0])));
+
+/* Regra geral de classe (não é dado de partida): quem costuma levar vantagem sobre quem */
+const BEATS = {Assassino:["Atirador","Artilharia","Suporte"],Tanque:["Atirador","Assassino"],Dano:["Tanque","Assassino"],Controlador:["Tanque","Assassino"],Artilharia:["Tanque","Controlador"],Atirador:["Artilharia","Suporte","Controlador"],Suporte:[]};
+
+/* ======================= ESTADO ======================= */
+const KEY="draftRanked.v1";
+const state = {
+  tab:"draft",
+  profile:{nick:"",owned:[],buffies:[]},
+  draft:{map:null,fp:null,pos:null,picks:{},hidden:[]},
+  onlyOwned:true, accFilter:"Todos", accQuery:"", sync:"local"
+};
+function loadLocal(){ try{ const raw=localStorage.getItem(KEY); if(raw){ const p=JSON.parse(raw); if(p&&Array.isArray(p.owned)) state.profile=cleanProfile(p); } }catch(e){} }
+function cleanProfile(p,fallbackNick){ return {nick:String(p.nick||fallbackNick||""),owned:Array.isArray(p.owned)?p.owned.filter(n=>CLS[n]):[],buffies:Array.isArray(p.buffies)?p.buffies.filter(n=>HAS_BUFFIE.has(n)):[]}; }
+function saveLocal(){ try{ localStorage.setItem(KEY,JSON.stringify(state.profile)); }catch(e){} }
+loadLocal();
+const owned = () => new Set(state.profile.owned);
+
+/* ======================= CÁLCULO ======================= */
+const modeVal = (list,n) => { const f=list.find(x=>x[0]===n); return f?f[1]:0; };
+function baseScore(n, mapObj){
+  const md = MODE_DATA[mapObj.m]; const why=[]; let s=0;
+  const mp = modeVal(mapObj.t,n);
+  if(mp){ s+=mp; why.push(["g",`+${fmt(mp)}% neste mapa`]); }
+  const forte = modeVal(md.fortes,n), facil = modeVal(md.faceis,n);
+  const mb = Math.max(forte, facil*0.9);
+  if(mb){ s+=mb*0.7; why.push(["g", forte? `Top no ${MODES[mapObj.m].nome}` : `Fácil de ganhar no modo`]); }
+  const ti = md.taxa.findIndex(x=>x[0]===n);
+  if(ti>=0){ s+=(11-ti)/11*2.5; if(!mb) why.push(["",`${fmt(md.taxa[ti][1])}% de vitória no modo`]); }
+  const rk = Math.max(modeVal(RANKED.fortes,n), modeVal(RANKED.faceis,n)*0.9);
+  if(rk){ s+=rk*0.3; why.push(["","Forte no ranked"]); }
+  if(TIER.S.some(x=>x[0]===n)){ s+=1.5; if(!nerfed(n)) why.push(["y","Tier S"]); }
+  else if(TIER.A.includes(n)){ s+=0.8; }
+  s=patchAdjust(n,s,why);
+  return {s,why};
+}
+function fmt(x){ return String(x).replace(".",","); }
+
+const ORDER = ["A1","B1","B2","A2","A3","B3"];
+const PHASE = {A1:0,B1:1,B2:1,A2:2,A3:2,B3:3};
+function mySlot(){ const d=state.draft; if(!d.fp||!d.pos) return null; const t = d.fp==="me"?"A":"B"; return t+d.pos; }
+function slotTeam(sl){ const meA = state.draft.fp==="me"; return (sl[0]==="A")===meA ? "a":"e"; }
+function visibleSlots(){ const me=mySlot(); if(!me) return []; return ORDER.filter(s=>PHASE[s]<PHASE[me]); }
+function partnerSlot(){ const me=mySlot(); if(!me) return null; return ORDER.find(s=>s!==me && PHASE[s]===PHASE[me]) || null; }
+
+function recommend(){
+  const d=state.draft; const mapObj=MAPS[d.map]; const vis=visibleSlots();
+  const picked = vis.map(s=>d.picks[s]).filter(Boolean);
+  const enemies = vis.filter(s=>slotTeam(s)==="e").map(s=>d.picks[s]).filter(Boolean);
+  const allies = vis.filter(s=>slotTeam(s)==="a").map(s=>d.picks[s]).filter(Boolean);
+  const own = owned(); const useOwned = state.onlyOwned && own.size>0;
+  const myBuffies = new Set(state.profile.buffies||[]);
+  const out=[];
+  for(const n of ALL){
+    if(picked.includes(n) || d.hidden.includes(n)) continue;
+    let {s,why}=baseScore(n,mapObj); why=why.slice();
+    const c=CLS[n];
+    for(const e of enemies){ const ec=CLS[e];
+      if(BEATS[c].includes(ec)){ s+=1.2; why.push(["g",`Bom contra ${e}`]); }
+      else if(BEATS[ec].includes(c)){ s-=1.2; why.push(["r",`${e} costuma vencer`]); } }
+    if(myBuffies.has(n)){ s+=0.5; why.push(["g","Você tem o Buffie"]); }
+    else if(HAS_BUFFIE.has(n)) why.push(["","Tem Buffie no jogo"]);
+    const dup = allies.filter(a=>CLS[a]===c).length;
+    if(dup){ s-=0.8*dup; why.push(["r",`Repete classe do time`]); }
+    out.push({n,s,why,own:own.has(n)});
+  }
+  out.sort((a,b)=>b.s-a.s);
+  const pool = useOwned ? out.filter(x=>x.own) : out;
+  return {top:pool.slice(0,5), all:out, useOwned, enemies, allies};
+}
+
+/* ======================= ÍCONES ======================= */
+const ICON = {
+  gem:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 3h10l4 6-9 12L3 9z"/></svg>',
+  ball:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="8.5"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z" fill="currentColor"/></svg>',
+  zone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="8.5" stroke-dasharray="4 3"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>',
+  heist:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="12" cy="12.5" r="3.5" fill="none" stroke="#fff" stroke-width="2"/></svg>',
+  bounty:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>',
+  ko:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="7.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/></svg>',
+  draft:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="7" height="16" rx="2"/><rect x="14" y="4" width="7" height="16" rx="2"/><path d="M6.5 9v6M17.5 9v6"/></svg>',
+  meta:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V5M5 11l7-7 7 7"/></svg>',
+  tips:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>',
+  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>'
+};
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const tile = (n,cls="") => `<span class="tile ${cls} k-${CLS[n]}" aria-hidden="true">${esc(abbr(n))}</span>`;
+const micon = m => `<span class="micon" style="background:var(${MODES[m].cor})">${ICON[m]}</span>`;
+
+/* ======================= RENDER ======================= */
+const app = document.getElementById("app");
+function render(){
+  renderTabs(); renderHello();
+  const t=state.tab;
+  app.innerHTML = t==="draft"?viewDraft() : t==="meta"?viewMeta() : t==="up"?viewUp() : t==="tips"?viewTips() : viewAccount();
+}
+function renderHello(){
+  const n=state.profile.owned.length;
+  document.getElementById("hello").innerHTML = state.profile.nick
+    ? `Oi, <b>${esc(state.profile.nick)}</b><br>${n} upados`
+    : `<span>${n?n+" upados":"Sem conta ainda"}</span>`;
+}
+function renderTabs(){
+  const items=[["draft","Draft"],["meta","Meta"],["up","Upar"],["tips","Dicas"],["account","Conta"]];
+  document.getElementById("tabs").innerHTML = items.map(([k,l])=>`<button class="tab" data-act="tab" data-v="${k}" ${state.tab===k?'aria-current="page"':""}>${ICON[k==="account"?"user":k]}<span>${l}</span></button>`).join("");
+}
+
+function viewDraft(){
+  const d=state.draft; let h="";
+  if(!state.profile.owned.length){
+    h+=`<div class="notice"><span>Cadastre os brawlers que você tem no nível 11 pra ver só sugestões que você pode jogar.</span><button class="btn small gold" data-act="tab" data-v="account">Criar conta</button></div>`;
+  }
+  /* 1 mapa */
+  if(d.map===null){
+    h+=`<section class="panel step"><div class="step-h"><span class="num">1</span><h2>Qual é o mapa?</h2></div>
+      <div class="modes">${Object.keys(MODES).map(m=>`<div><div class="mode-h">${micon(m)}<h3>${MODES[m].nome}</h3></div>
+      <div class="maps">${MAPS.map((x,i)=>x.m!==m?"":`<button class="map" data-act="map" data-v="${i}"><b>${esc(x.n)}</b><span>${x.t.length?"Top: "+x.t.map(t=>esc(t[0])).join(", "):"Usa dados do modo"}</span></button>`).join("")}</div></div>`).join("")}</div></section>`;
+    return h;
+  }
+  const mo=MAPS[d.map];
+  h+=`<section class="panel step done"><div class="step-h"><span class="num">✓</span>${micon(mo.m)}<div><div class="eyebrow">${MODES[mo.m].nome}</div><div class="chosen">${esc(mo.n)}</div></div><button class="edit" data-act="reset" data-v="map">Trocar</button></div>
+    ${mo.t.length?(()=>{const b=mo.t.find(t=>!PATCH.forte[t[0]])||mo.t[0];const skipped=mo.t.filter(t=>PATCH.forte[t[0]]&&t!==b).map(t=>t[0]);
+      return `<div class="sub">Ban que os dados indicam aqui: <b style="color:var(--ink)">${esc(b[0])}</b> (+${fmt(b[1])}% no mapa)${skipped.length?`. ${skipped.map(esc).join(" e ")} liderava, mas tomou nerf forte em ${PATCH.data}.`:""}</div>`;})():`<div class="sub">Esse mapa ainda não tem top 3 próprio nos dados. As sugestões usam os números do modo.</div>`}</section>`;
+  /* 2 first pick */
+  if(!d.fp){
+    h+=`<section class="panel step"><div class="step-h"><span class="num">2</span><h2>Quem ficou com o first pick?</h2></div>
+      <div class="choice"><button class="opt ally" data-act="fp" data-v="me"><big>Meu time</big><small>A gente escolhe primeiro</small></button>
+      <button class="opt enemy" data-act="fp" data-v="enemy"><big>Inimigo</big><small>Eles escolhem primeiro</small></button></div></section>`;
+    return h;
+  }
+  h+=`<section class="panel step done"><div class="step-h"><span class="num">✓</span><div><div class="eyebrow">First pick</div><div class="chosen" style="color:var(${d.fp==="me"?"--ally":"--enemy"})">${d.fp==="me"?"Meu time":"Time inimigo"}</div></div><button class="edit" data-act="reset" data-v="fp">Trocar</button></div></section>`;
+  /* 3 posição */
+  if(!d.pos){
+    const when = p => { const sl=(d.fp==="me"?"A":"B")+p; const idx=ORDER.indexOf(sl)+1; return idx===1?"Escolhe primeiro de todos":idx===6?"Último pick, vê tudo":`Escolhe no ${idx}º pick`; };
+    h+=`<section class="panel step"><div class="step-h"><span class="num">3</span><h2>Qual a sua posição no time?</h2></div>
+      <div class="choice three">${[1,2,3].map(p=>`<button class="opt" data-act="pos" data-v="${p}"><big>${p}º</big><small>${p===1?"Primeiro da lista":p===2?"Meio":"Último da lista"}</small><small>${when(p)}</small></button>`).join("")}</div></section>`;
+    return h;
+  }
+  const me=mySlot();
+  h+=`<section class="panel step done"><div class="step-h"><span class="num">✓</span><div><div class="eyebrow">Sua posição</div><div class="chosen">${d.pos}º da lista · ${ORDER.indexOf(me)+1}º pick da partida</div></div><button class="edit" data-act="reset" data-v="pos">Trocar</button></div>
+    <div class="order">${ORDER.map((s,i)=>{const t=slotTeam(s);const cls=s===me?"me":PHASE[s]<PHASE[me]?"past":PHASE[s]===PHASE[me]?"past":"fut";return `<div class="ord ${t} ${cls}"><i>${i+1}</i>${s===me?"Você":t==="a"?"Aliado":"Inimigo"}</div>`;}).join("")}</div></section>`;
+  /* 4 picks visíveis */
+  const vis=visibleSlots();
+  if(vis.length){
+    h+=`<section class="panel step"><div class="step-h"><span class="num">4</span><h2>Quem já foi escolhido?</h2></div>
+      <div class="sub">Toque pra marcar. Pode pular os que você não souber.</div>
+      <div class="slots">${vis.map(s=>{const t=slotTeam(s);const n=d.picks[s];const idx=ORDER.indexOf(s)+1;
+        return `<button class="slot ${t} ${n?"filled":""}" data-act="slot" data-v="${s}">${n?tile(n):`<span class="tile" style="border-style:dashed">+</span>`}<div><div class="who">${t==="a"?"Aliado":"Inimigo"} · ${idx}º</div><div class="nm">${n?esc(n):"Escolher"}</div></div></button>`;}).join("")}</div></section>`;
+  }
+  /* 5 resultado */
+  h+=viewResult();
+  return h;
+}
+
+function viewResult(){
+  const d=state.draft; const me=mySlot(); const ph=PHASE[me];
+  const r=recommend(); const own=owned();
+  const tip = ph===0 ? "Você é o first pick. Os dados mostram o que mais ganha neste mapa; prefira algo difícil de counterar."
+    : ph===3 ? "Último pick: você vê os dois times inteiros, então o counter pesa mais."
+    : r.enemies.length ? "Já tem pick inimigo na mesa, então as sugestões somam o mapa com a vantagem de classe contra eles." : "Marque os picks acima pra sugestão considerar os counters.";
+  let h=`<section class="step"><div class="step-h"><span class="num" style="background:var(--gold);color:var(--on-gold)">★</span><h2>Seus 5 melhores picks</h2></div>
+    <div class="sub">${tip}</div>
+    <div class="toggle"><button class="sw" role="switch" aria-checked="${state.onlyOwned&&own.size>0}" data-act="owned" ${own.size?"":"disabled"} aria-label="Só brawlers upados"></button><span>${own.size?`Só meus upados (${own.size})`:"Cadastre seus upados na aba Conta"}</span></div>`;
+  if(!r.top.length){
+    h+=`<div class="panel">Nenhum dos seus upados sobrou pra esse draft. Desligue o filtro acima pra ver todos.</div>`;
+  } else {
+    const max=Math.max(...r.top.map(x=>x.s),1);
+    h+=`<div class="picks">${r.top.map((x,i)=>`<div class="pick ${i===0?"first":""}">${tile(x.n,"lg")}
+      <div><div class="rank">${i===0?"Melhor escolha":(i+1)+"ª opção"}</div><div class="name">${esc(x.n)}</div><div class="cls">${CLASS_LABEL[CLS[x.n]]}${x.own?' · <span style="color:var(--good);font-weight:600">upado</span>':""}</div>
+      <div class="why">${(x.why.length?x.why:[["","Sem destaque nos dados, entra pelo seu elenco"]]).slice(0,4).map(w=>`<span class="chip ${w[0]}">${esc(w[1])}</span>`).join("")}</div>
+      <button class="x" data-act="hide" data-v="${esc(x.n)}">Foi banido ou pego? Tirar</button></div>
+      <div class="score"><b>${Math.round(Math.max(0,x.s)/max*100)}</b><small>pontos</small></div></div>`).join("")}</div>`;
+  }
+  if(d.hidden.length) h+=`<div class="sub">Tirados: ${d.hidden.map(esc).join(", ")} · <button class="x" data-act="unhide">desfazer</button></div>`;
+  /* amigos */
+  const partner=partnerSlot();
+  const laterAllies = ORDER.filter(s=>slotTeam(s)==="a" && s!==me && PHASE[s]>=PHASE[me]).length;
+  if(laterAllies){
+    const first=r.top[0]?.n; const fc=first?CLS[first]:null;
+    const fr=r.all.filter(x=>x.n!==first && !r.top.slice(0,1).some(t=>t.n===x.n)).sort((a,b)=>(b.s-(CLS[b.n]===fc?1:0))-(a.s-(CLS[a.n]===fc?1:0))).slice(0,3);
+    h+=`<div class="panel stack" style="gap:10px"><h3>Pra sugerir aos amigos</h3><div class="sub">${partner&&slotTeam(partner)==="a"?"Seu parceiro escolhe junto com você, então combinem antes. ":""}Opções fortes no mapa com classe diferente da sua melhor escolha.</div>
+      <div class="friends">${fr.map(x=>`<span class="fr">${tile(x.n)}${esc(x.n)}</span>`).join("")}</div></div>`;
+  }
+  h+=`<div class="src">A pontuação junta a vantagem de vitória no mapa, no modo e no ranked (Brawl Time Ninja, 1 nov) com o tier por vitória (Brawl Planet). Esses números são de antes do balanceamento de ${PATCH.data}: nerf forte corta a pontuação pela metade, nerf leve tira 20% e buff soma um pouco, até sair dado novo. O "bom contra" é regra geral de classe, não estatística de confronto.</div>
+    <button class="btn" data-act="newdraft">Novo draft</button></section>`;
+  return h;
+}
+
+function viewMeta(){
+  const row=(n,v,pos)=>`<div class="row">${tile(n)}<span class="nm">${esc(n)}</span><span class="val ${pos?"pos":""}">${v}</span></div>`;
+  const sOk=TIER.S.filter(x=>!nerfed(x[0])), aOk=TIER.A.filter(n=>!nerfed(n));
+  const nerfList=[...Object.entries(PATCH.forte).map(e=>[...e,"forte"]),...Object.entries(PATCH.leve).map(e=>[...e,"leve"])];
+  let h=`<section class="stack"><h2>O que está ganhando agora</h2>
+   <div class="notice" style="display:block"><b>Balanceamento de ${PATCH.data}.</b> Os números abaixo são de antes do patch, porque os sites de estatística ainda não recalcularam. Quem foi nerfado saiu dos tiers e tem a pontuação reduzida no draft até sair dado novo.</div>
+   <div class="grid2">
+    <div class="panel"><div class="eyebrow">Tier S · sem nerf</div><div class="rows">${sOk.map(x=>row(x[0],fmt(x[1])+"%")).join("")}</div>
+      <div class="eyebrow" style="margin-top:10px">Tier A · sem nerf</div><p style="margin:6px 0 0">${aOk.map(esc).join(" · ")}</p>
+      <div class="src" style="margin-top:8px">Brawl Planet, 3 nov 2026, ainda com dados de antes do patch. O Vince ainda tem pouco dado no ranked.</div></div>
+    <div class="panel"><div class="eyebrow">Nerfados em ${PATCH.data}</div><div class="rows">${nerfList.map(([n,t,k])=>`<div class="row">${tile(n)}<span class="nm">${esc(n)}<br><span class="sub" style="font-weight:400">${esc(t)}</span></span><span class="chip r">${k==="forte"?"forte":"leve"}</span></div>`).join("")}</div></div>
+    <div class="panel"><div class="eyebrow">Buffados em ${PATCH.data}</div><div class="rows">${Object.entries(PATCH.buff).map(([n,t])=>`<div class="row">${tile(n)}<span class="nm">${esc(n)}<br><span class="sub" style="font-weight:400">${esc(t)}</span></span><span class="chip g">buff</span></div>`).join("")}</div>
+      <div class="src" style="margin-top:8px">Também mudaram: ${Object.keys(PATCH.misto).map(esc).join(", ")}. Fonte: <a href="https://supercell.com/en/games/brawlstars/blog/game-updates/release-notes-november-2026/" target="_blank" rel="noopener">notas oficiais da Supercell</a>.</div></div>
+    <div class="panel"><div class="eyebrow">Mais fortes no ranked</div><div class="rows">${RANKED.fortes.map(x=>row(x[0],"+"+fmt(x[1])+"%",1)).join("")}</div>
+      <div class="eyebrow" style="margin-top:10px">Mais fáceis de ganhar</div><div class="rows">${RANKED.faceis.map(x=>row(x[0],"+"+fmt(x[1])+"%",1)).join("")}</div>
+      <div class="src" style="margin-top:8px">Brawl Time Ninja, 1 nov 2026, 4,4 milhões de partidas ranqueadas.</div></div>
+   </div>
+   <h2>Buffies</h2>
+   <div class="panel stack" style="gap:10px">
+     <p style="margin:0">Buffie é um reforço por trio: cada brawler ganha um Buffie de Star Power, um de Gadget e um Hyper Buffie, que adicionam efeitos extras a essas habilidades. No ranked da temporada 49, brawlers com Buffie apareceram em 54% das partidas e ganharam 50,6% delas, contra 49,3% dos outros.</p>
+     <div class="src">Fonte: <a href="https://trophycoach.com/brawl-stars/guides/brawl-stars-ranked-mode-guide" target="_blank" rel="noopener">TrophyCoach</a>.</div>
+   </div>
+   <div class="grid2">
+     <div class="panel"><div class="eyebrow">Novos, anunciados em 31 out</div>
+       ${BUFFIES_NEW.map(t=>`<h3 style="margin:10px 0 2px">${esc(t.trio)}</h3><div class="rows">${t.b.map(([n,e])=>`<div class="row">${tile(n)}<span class="nm">${esc(n)}<br><span class="sub" style="font-weight:400">${esc(e)}</span></span></div>`).join("")}</div>`).join("")}
+       <div class="src" style="margin-top:8px">Ainda não chegaram no jogo e a data não foi confirmada. Fontes: <a href="https://brawlstarsblog.com/november-2026-brawl-talk/" target="_blank" rel="noopener">Brawl Stars Blog</a>, <a href="https://brawlmetrics.gg/buffies" target="_blank" rel="noopener">BrawlMetrics</a>.</div></div>
+     <div class="panel"><div class="eyebrow">Já no jogo · 27 brawlers</div><div class="rows">${BUFFIES.map(t=>`<div class="mline"><b>${esc(t.trio)}</b><span>${t.b.map(esc).join(", ")} · ${t.data}</span></div>`).join("")}</div></div>
+   </div>
+   <h2>Por modo</h2><div class="grid2">${Object.keys(MODES).map(m=>`<div class="panel"><div class="mode-h">${micon(m)}<h3>${MODES[m].nome}</h3></div><div class="rows">${MODE_DATA[m].fortes.map(x=>row(x[0],"+"+fmt(x[1])+"%",1)).join("")}</div></div>`).join("")}</div>
+   <h2>Por mapa do ranked</h2><div class="panel">${Object.keys(MODES).map(m=>`<details class="mapref" ${m==="gem"?"open":""}><summary>${micon(m)}${MODES[m].nome}</summary>${MAPS.filter(x=>x.m===m).map(x=>`<div class="mline"><b>${esc(x.n)}</b><span>${x.t.length?x.t.map(t=>`${esc(t[0])} +${fmt(t[1])}`).join(" · "):"sem top próprio, use o modo"}</span></div>`).join("")}</details>`).join("")}</div>
+   <div class="src">Fontes: <a href="https://brawltime.ninja/tier-list/ranked" target="_blank" rel="noopener">Brawl Time Ninja · Ranked</a> e <a href="https://www.brawlplanet.com/tier-list" target="_blank" rel="noopener">Brawl Planet · Tier list</a>. "Vantagem" é quanto a taxa de vitória sobe em relação à média.</div></section>`;
+  return h;
+}
+
+function upgradeList(){
+  const own=owned(); const res=[];
+  for(const n of ALL){
+    let s=0, maps=0, modes=[];
+    for(const mp of MAPS){ const v=modeVal(mp.t,n); if(v){ s+=v; maps++; } }
+    for(const m of Object.keys(MODES)){ const v=Math.max(modeVal(MODE_DATA[m].fortes,n),modeVal(MODE_DATA[m].faceis,n)*0.9); if(v){ s+=v*0.7; modes.push(MODES[m].nome);} }
+    s+=Math.max(modeVal(RANKED.fortes,n),modeVal(RANKED.faceis,n))*0.8;
+    if(TIER.S.some(x=>x[0]===n)) s+=3; else if(TIER.A.includes(n)) s+=1.5;
+    if(s>0) s=patchAdjust(n,s,[]);
+    if(s>0) res.push({n,s,maps,modes,own:own.has(n)});
+  }
+  return res.sort((a,b)=>b.s-a.s);
+}
+function viewUp(){
+  const own=owned(); const L=upgradeList(); const todo=L.filter(x=>!x.own).slice(0,10);
+  const gaps=Object.keys(MODES).filter(m=>{ const names=[...MODE_DATA[m].fortes,...MODE_DATA[m].faceis].map(x=>x[0]).concat(MAPS.filter(x=>x.m===m).flatMap(x=>x.t.map(t=>t[0]))); return !names.some(n=>own.has(n)); });
+  let h=`<section class="stack"><h2>Onde gastar recurso</h2>
+    <div class="sub">Ranqueado por quantos mapas do ranked o brawler aparece no top 3, força nos modos e no ranked geral. ${own.size?"Quem você já tem upado fica de fora.":"Cadastre seus upados na Conta pra tirar os que você já tem."}</div>`;
+  if(own.size && gaps.length){
+    h+=`<div class="notice"><span>Nenhum dos seus upados aparece nos dados de: <b>${gaps.map(g=>MODES[g].nome).join(", ")}</b>. Ter pelo menos um forte em cada modo ajuda mais do que três no mesmo.</span></div>`;
+  }
+  h+=`<div class="picks">${todo.map((x,i)=>`<div class="pick ${i===0?"first":""}">${tile(x.n,"lg")}<div><div class="rank">${i+1}º pra upar</div><div class="name">${esc(x.n)}</div><div class="cls">${CLASS_LABEL[CLS[x.n]]}</div>
+    <div class="why">${(()=>{const p=patchOf(x.n);return !p?"":p[0]==="buff"?`<span class="chip g">Buffado em ${PATCH.data}</span>`:p[0]==="misto"?"":`<span class="chip r">${p[0]==="forte"?"Nerfado":"Nerf leve"} em ${PATCH.data}</span>`;})()}${x.maps?`<span class="chip g">Top 3 em ${x.maps} mapa${x.maps>1?"s":""}</span>`:""}${HAS_BUFFIE.has(x.n)?'<span class="chip">Tem Buffie</span>':SOON_BUFFIE.has(x.n)?'<span class="chip y">Buffie chegando</span>':""}${x.modes.slice(0,3).map(m=>`<span class="chip">${m}</span>`).join("")}${TIER.S.some(t=>t[0]===x.n)?'<span class="chip y">Tier S</span>':""}</div></div><div></div></div>`).join("")}</div>`;
+  const mine=L.filter(x=>x.own).slice(0,6);
+  if(mine.length) h+=`<div class="panel"><h3>Seus upados que mais rendem agora</h3><div class="rows" style="margin-top:6px">${mine.map(x=>`<div class="row">${tile(x.n)}<span class="nm">${esc(x.n)}</span><span class="val">${x.maps?x.maps+" mapa"+(x.maps>1?"s":""):"modo"}</span></div>`).join("")}</div></div>`;
+  h+=`<div class="src">O ranked só aceita brawlers no nível 11, então upar até o 11 é o que libera o pick. O meta muda a cada balanceamento; os números são de 1 e 2 de novembro de 2026.</div></section>`;
+  return h;
+}
+
+function viewTips(){
+  const me = mySlot();
+  return `<section class="stack"><h2>Como a ranked funciona</h2>
+   <div class="panel stack" style="gap:10px"><div class="eyebrow">Ligas</div>
+     <div class="ladder">${["Bronze","Prata","Ouro","Diamante","Mítico","Lendário","Mestre","Pro"].map(x=>`<span class="${x==="Mítico"?"hl":""}">${x}</span>`).join("")}</div>
+     <div class="sub">A partir do Diamante tem ban e você vê os picks do inimigo. A partir do Mítico I cada confronto é melhor de 3.</div></div>
+   <div class="panel stack"><div class="eyebrow">Ordem do draft</div>
+     <div class="order">${ORDER.map((s,i)=>`<div class="ord ${s[0]==="A"?"a":"e"}"><i>${i+1}</i>${s[0]==="A"?"Time 1":"Time 2"}</div>`).join("")}</div>
+     <p class="sub" style="margin:0">O time do first pick escolhe 1, o outro escolhe 2 ao mesmo tempo, volta 2 pro primeiro e o último pick fecha. Quem pega o 1º pick tem menos informação; quem pega o 6º vê tudo e pode counterar.${me?` No seu draft atual você é o ${ORDER.indexOf(me)+1}º.`:""}</p></div>
+   <div class="panel stack">
+     ${[["1","Ban no mapa, não no medo","Bana o brawler mais forte daquele mapa que seu time não sabe responder. Na aba Meta tem o top 3 de cada mapa."],
+        ["2","First pick seguro","Primeiro pick vai em algo forte no mapa e que funcione contra quase tudo."],
+        ["3","Último pick é counter","Quem escolhe por último deve olhar o time inimigo inteiro antes de decidir."],
+        ["4","Cada um com uma função","Um time bom tem três trabalhos diferentes: segurar linha, pressionar o objetivo e cobrir o ponto fraco. Evite três da mesma classe."],
+        ["5","Cobertura antes de profundidade","Tenha pelo menos um brawler forte upado pra cada um dos 6 modos antes de upar o terceiro pro mesmo modo."],
+        ["6","Combine o pick em dupla","Quem escolhe no mesmo turno escolhe ao mesmo tempo. Avise no chat rápido antes de travar."]].map(t=>`<div class="tip"><span class="ic">${t[0]}</span><div><b>${t[1]}</b><p>${t[2]}</p></div></div>`).join("")}
+   </div>
+   <div class="panel"><div class="eyebrow">O que cada modo pede</div><div class="tscroll"><table><thead><tr><th>Modo</th><th>Como vence</th><th>Erro comum</th></tr></thead><tbody>
+     <tr><td>Pique-Gema</td><td>Segurar 10 gemas por 15 s; 1 carregador e 2 nas linhas</td><td>Carregador andando no meio com 8+ gemas</td></tr>
+     <tr><td>Futebrawl</td><td>2 gols; 1 atacante, 1 defensor, 1 que ganha a linha</td><td>Os três correndo atrás da bola</td></tr>
+     <tr><td>Nocaute</td><td>2 de 3 rounds; dois de alcance e um flex</td><td>Entrar agressivo e virar 2 contra 3</td></tr>
+     <tr><td>Zona Estratégica</td><td>Encher a zona primeiro; 2 de controle de área</td><td>Brigar fora da zona com 80%+</td></tr>
+     <tr><td>Roubo</td><td>Quebrar o cofre ou ganhar no dano</td><td>Todo mundo defendendo e ninguém no cofre</td></tr>
+     <tr><td>Caça-Estelar</td><td>Ter mais estrelas no fim; alcance e sobrevivência</td><td>Trocar 1 por 1 quando já está na frente</td></tr>
+   </tbody></table></div></div>
+   <div class="panel stack" style="gap:8px"><div class="eyebrow">Mudanças recentes da ranked</div>
+     <div class="rows">${["Só entram brawlers no nível 11, em todas as ligas","Diamante pede 12 brawlers no nível 11 (antes eram 9)","Brawlers grátis no máximo por temporada subiram de 3 pra 6","A ranked agora desbloqueia com 5.000 troféus; quem já tinha acesso continua","Do Mestre I pra cima não pode fazer time","O reset de temporada derruba 2 ligas em vez de 6","Vitória 2-0 dá mais pontos; derrota 1-2 tira menos","A tela de pick e ban ganhou sugestão de ban, troca de ordem, filtros e chat rápido","Cada vitória na ranked dá 60 de XP do Pro Pass, até 1.200 por semana"].map(x=>`<div class="row" style="padding:7px 0"><span class="nm" style="font-weight:500">${x}</span></div>`).join("")}</div>
+     <div class="src">Fontes: <a href="https://trophycoach.com/brawl-stars/guides/brawl-stars-ranked-mode-guide" target="_blank" rel="noopener">TrophyCoach · guia da ranked</a>, <a href="https://supercell.com/en/games/brawlstars/blog/game-updates/release-notes-november-2026/" target="_blank" rel="noopener">notas oficiais de novembro 2026</a>.</div></div>
+  </section>`;
+}
+
+function viewAccount(){
+  const own=owned(); const f=state.accFilter, q=state.accQuery.trim().toLowerCase();
+  const list=ALL.filter(n=>(f==="Todos"||CLS[n]===f)&&(!q||n.toLowerCase().includes(q)));
+  return `<section class="stack"><h2>${state.profile.nick?"Sua conta":"Criar sua conta"}</h2>
+   <div class="panel stack">
+     <div class="field"><label for="nick">Seu nick</label><input type="text" id="nick" maxlength="24" placeholder="Como te chamam no jogo" value="${esc(state.profile.nick)}" autocomplete="off"></div>
+     <div class="saved" id="saved">${syncLabel()}</div>
+   </div>
+   <div class="panel stack">
+     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap"><div><h3>Brawlers no nível 11</h3><div class="sub">Marque todos que você tem upados. Só esses entram na ranked.</div></div><div><span class="count">${own.size}</span><span class="muted"> / ${ALL.length}</span></div></div>
+     <input type="search" id="accq" placeholder="Buscar brawler" value="${esc(state.accQuery)}" autocomplete="off">
+     <div class="filters">${["Todos",...Object.keys(CLASSES)].map(c=>`<button class="fchip ${f===c?"on":""}" data-act="accf" data-v="${c}">${c==="Todos"?"Todos":CLASS_LABEL[c]}</button>`).join("")}</div>
+     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" data-act="selall">Marcar estes ${list.length}</button><button class="btn small" data-act="selnone">Desmarcar estes</button></div>
+     <div class="bgrid" id="accgrid">${list.map(n=>`<button class="bcell ${own.has(n)?"on":""}" data-act="own" data-v="${esc(n)}" aria-pressed="${own.has(n)}">${tile(n)}<span>${esc(n)}</span></button>`).join("")||'<div class="sub">Nenhum brawler com esse nome.</div>'}</div>
+   </div>
+   <div class="panel stack">
+     <div><h3>Seus Buffies</h3><div class="sub">Marque os brawlers em que você já tem Buffie. Eles ganham um pouco de pontuação no seu draft.</div></div>
+     ${BUFFIES.map(t=>`<div><div class="eyebrow" style="margin-bottom:6px">${esc(t.trio)} · ${t.data}</div><div class="friends">${t.b.map(n=>{const on=(state.profile.buffies||[]).includes(n);return `<button class="fr bufb ${on?"on":""}" data-act="buf" data-v="${esc(n)}" aria-pressed="${on}">${tile(n)}${esc(n)}${on?' <span style="color:var(--good)">✓</span>':""}</button>`;}).join("")}</div></div>`).join("")}
+   </div>
+   ${own.size?`<button class="btn gold" data-act="tab" data-v="draft">Ir pro draft</button>`:""}
+  </section>`;
+}
+function syncLabel(){
+  return state.sync==="cloud" ? "Salvo na sua conta Claude, aparece em qualquer aparelho."
+    : state.sync==="saving" ? "Salvando…"
+    : state.sync==="loading" ? "Carregando sua conta…"
+    : "Salvo neste aparelho.";
+}
+
+/* ======================= SELETOR DE BRAWLER ======================= */
+const sheet=document.getElementById("sheet"); let sheetSlot=null, sheetQ="", sheetF="Todos";
+function openSheet(slot){ sheetSlot=slot; sheetQ=""; sheetF="Todos"; drawSheet(); sheet.hidden=false; setTimeout(()=>{const i=document.getElementById("sq"); i&&i.focus();},30); }
+function closeSheet(){ sheet.hidden=true; sheetSlot=null; }
+function drawSheet(keepFocus){
+  const d=state.draft; const taken=new Set(Object.entries(d.picks).filter(([s,n])=>s!==sheetSlot&&n&&visibleSlots().includes(s)).map(([,n])=>n));
+  const q=sheetQ.trim().toLowerCase(); const list=ALL.filter(n=>(sheetF==="Todos"||CLS[n]===sheetF)&&(!q||n.toLowerCase().includes(q)));
+  const t=slotTeam(sheetSlot);
+  const grid=`<div class="bgrid">${list.map(n=>`<button class="bcell" data-act="pickb" data-v="${esc(n)}" ${taken.has(n)?"disabled":""}>${tile(n)}<span>${esc(n)}</span></button>`).join("")||'<div class="sub">Nada encontrado.</div>'}</div>`;
+  if(keepFocus){ document.getElementById("sbody").innerHTML=grid; document.querySelectorAll("#sfil .fchip").forEach(b=>b.classList.toggle("on",b.dataset.v===sheetF)); return; }
+  sheet.innerHTML=`<div class="sheet" data-act="closebg"><div class="sheet-in" role="dialog" aria-modal="true" aria-label="Escolher brawler">
+    <div class="sheet-h"><h3 style="color:var(${t==="a"?"--ally":"--enemy"})">${t==="a"?"Pick do aliado":"Pick do inimigo"} · ${ORDER.indexOf(sheetSlot)+1}º</h3>
+    <div style="display:flex;gap:6px">${d.picks[sheetSlot]?'<button class="btn small" data-act="clearslot">Limpar</button>':""}<button class="btn small" data-act="close">Fechar</button></div></div>
+    <input type="search" id="sq" placeholder="Digite o nome" autocomplete="off">
+    <div class="filters" id="sfil">${["Todos",...Object.keys(CLASSES)].map(c=>`<button class="fchip ${sheetF===c?"on":""}" data-act="sf" data-v="${c}">${c==="Todos"?"Todos":CLASS_LABEL[c]}</button>`).join("")}</div>
+    <div class="sheet-body" id="sbody">${grid}</div></div></div>`;
+}
+
+/* ======================= EVENTOS ======================= */
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]"); if(!b) return;
+  const a=b.dataset.act, v=b.dataset.v, d=state.draft;
+  if(a==="closebg"){ if(e.target===b) closeSheet(); return; }
+  switch(a){
+    case "tab": state.tab=v; render(); window.scrollTo({top:0}); return;
+    case "map": d.map=+v; d.fp=null; d.pos=null; d.picks={}; d.hidden=[]; break;
+    case "fp": d.fp=v; d.pos=null; d.picks={}; break;
+    case "pos": d.pos=+v; d.picks={}; break;
+    case "reset": if(v==="map"){d.map=null;d.fp=null;d.pos=null;} if(v==="fp"){d.fp=null;d.pos=null;} if(v==="pos"){d.pos=null;} d.picks={}; d.hidden=[]; break;
+    case "slot": openSheet(v); return;
+    case "pickb": d.picks[sheetSlot]=v; closeSheet(); break;
+    case "clearslot": delete d.picks[sheetSlot]; closeSheet(); break;
+    case "close": closeSheet(); return;
+    case "sf": sheetF=v; drawSheet(true); return;
+    case "hide": d.hidden.push(v); break;
+    case "unhide": d.hidden=[]; break;
+    case "owned": state.onlyOwned=!state.onlyOwned; break;
+    case "newdraft": state.draft={map:null,fp:null,pos:null,picks:{},hidden:[]}; render(); window.scrollTo({top:0}); return;
+    case "accf": state.accFilter=v; break;
+    case "buf": { const s=new Set(state.profile.buffies||[]); s.has(v)?s.delete(v):s.add(v); state.profile.buffies=[...s].sort(); persist(); break; }
+    case "own": { const s=owned(); s.has(v)?s.delete(v):s.add(v); state.profile.owned=[...s].sort(); persist(); b.classList.toggle("on"); b.setAttribute("aria-pressed",s.has(v)); refreshCount(); return; }
+    case "selall": case "selnone": { const f=state.accFilter,q=state.accQuery.trim().toLowerCase(); const list=ALL.filter(n=>(f==="Todos"||CLS[n]===f)&&(!q||n.toLowerCase().includes(q))); const s=owned(); list.forEach(n=>a==="selall"?s.add(n):s.delete(n)); state.profile.owned=[...s].sort(); persist(); break; }
+    default: return;
+  }
+  render();
+});
+function refreshCount(){ const c=document.querySelector(".count"); if(c) c.textContent=state.profile.owned.length; renderHello(); }
+document.addEventListener("input",e=>{
+  if(e.target.id==="sq"){ sheetQ=e.target.value; drawSheet(true); }
+  if(e.target.id==="accq"){ state.accQuery=e.target.value; const g=document.getElementById("accgrid"); const own=owned(); const f=state.accFilter,q=state.accQuery.trim().toLowerCase();
+    const list=ALL.filter(n=>(f==="Todos"||CLS[n]===f)&&(!q||n.toLowerCase().includes(q)));
+    g.innerHTML=list.map(n=>`<button class="bcell ${own.has(n)?"on":""}" data-act="own" data-v="${esc(n)}" aria-pressed="${own.has(n)}">${tile(n)}<span>${esc(n)}</span></button>`).join("")||'<div class="sub">Nenhum brawler com esse nome.</div>';
+    const sb=document.querySelector('[data-act="selall"]'); if(sb) sb.textContent=`Marcar estes ${list.length}`; }
+  if(e.target.id==="nick"){ state.profile.nick=e.target.value.slice(0,24); renderHello(); persist(); }
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!sheet.hidden) closeSheet(); });
+
+/* ======================= CONTA NA NUVEM ======================= */
+let dbRef=null, writing=false, pending=false, timer=null;
+function persist(){
+  saveLocal();
+  if(!dbRef) return;
+  clearTimeout(timer); timer=setTimeout(flush,700);
+}
+async function flush(){
+  if(!dbRef) return;
+  if(writing){ pending=true; return; }
+  writing=true; setSync("saving");
+  try{ await dbRef.set({nick:state.profile.nick,owned:state.profile.owned,buffies:state.profile.buffies||[],updatedAt:Date.now()}); setSync("cloud"); }
+  catch(err){ setSync("local"); if(err&&err.code==="invalid_argument") dbRef=null; }
+  writing=false; if(pending){ pending=false; flush(); }
+}
+function setSync(s){ state.sync=s; const el=document.getElementById("saved"); if(el) el.textContent=syncLabel(); }
+(async()=>{
+  try{
+    if(!window.claude||!window.claude.use) return;
+    const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+    if(!db||!user) return;
+    const uid=await user.id(); if(!uid) return;
+    try{ const nm=await user.name(); if(nm&&!state.profile.nick){ state.profile.nick=nm.split(" ")[0]; } }catch(e){}
+    dbRef=db.doc("data/users/"+uid+"/profile");
+    setSync("loading");
+    const snap=await dbRef.get();
+    if(snap.exists){ const p=snap.data()||{}; state.profile=cleanProfile(p,state.profile.nick); saveLocal(); setSync("cloud"); render(); }
+    else if(state.profile.owned.length||state.profile.nick){ render(); flush(); }
+    else { setSync("cloud"); render(); }
+  }catch(e){ setSync("local"); }
+})();
+
+render();
+</script>
+
+</body>
+</html>
