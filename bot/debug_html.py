@@ -9,18 +9,13 @@ def baixar(url):
         return r.read().decode("utf-8", "replace")
 
 
-for url in ["https://www.brawlplanet.com/pt-br/powerleague",
-            "https://www.brawlplanet.com/pt-br/maps/hardrockmine_gemgrab"]:
-    h = baixar(url)
-    print("=" * 80, "\n", url, "tamanho", len(h))
-    print("NEXT_DATA:", "__NEXT_DATA__" in h, "| self.__next_f:", "self.__next_f" in h)
-    for palavra in ["rquivad", "Todos os ranques", "Ranqueada", "Mina rochosa", "Bolt", "58.8", "58,8"]:
-        idx = [m.start() for m in re.finditer(re.escape(palavra), h)][:6]
-        print(f"  {palavra!r}: {len(idx)} ocorrências {idx}")
-    links = re.findall(r'href="(/pt-br/maps/[^"]+)"', h)
-    print("  links de mapa:", len(links), links[:5])
-    for palavra in ["rquivad", "Todos os ranques", "58.8"]:
-        i = h.find(palavra)
-        if i >= 0:
-            print(f"--- contexto de {palavra!r} ---")
-            print(h[max(0, i - 700): i + 900].replace("\n", " "))
+h = baixar("https://www.brawlplanet.com/pt-br/maps/hardrockmine_gemgrab")
+print("h1:", re.findall(r"<h1[^>]*>(.*?)</h1>", h)[:2])
+print("title:", re.findall(r"<title>(.*?)</title>", h)[:1])
+ids = [(m.start(), m.group(1)) for m in re.finditer(r'id="([^"]*tab[^"]*)"', h)]
+print("ids com tab:", ids[:20])
+i = h.find("58.8", 190000)
+print("--- contexto 202445 ---")
+print(h[201200:205200])
+slugs = re.findall(r'href="/pt-br/brawlers/([^"]+)"', h)
+print("slugs de brawler:", len(slugs), sorted(set(slugs)))
