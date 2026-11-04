@@ -4,11 +4,6 @@ on:
   schedule:
     - cron: "47 13 * * *"   # todo dia, 10h47 no horário de Brasília
   workflow_dispatch:
-    inputs:
-      debug:
-        description: "Só mostrar a estrutura das páginas"
-        type: boolean
-        default: false
 
 permissions:
   contents: write
@@ -22,16 +17,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Ver estrutura (debug)
-        if: ${{ inputs.debug }}
-        run: python bot/debug_html.py
       - name: Atualizar mapas
-        if: ${{ !inputs.debug }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python bot/mapas.py
       - name: Salvar
-        if: ${{ !inputs.debug }}
         run: |
           git config user.name "vigia-brawl"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
